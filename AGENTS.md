@@ -8,6 +8,22 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 <!-- END:nextjs-agent-rules -->
 
+## Project
+
+Issues + Wiki: a work-tracking and shared-documentation app, built while following lessons from [Next.js Fundamentals](https://github.com/Hendrixer/next.js-fundamentals/tree/main/lessons).
+
+**Stack:** Next.js App Router (v16, webpack dev/build), React 19, TypeScript, Tailwind CSS v4, shadcn/ui (`new-york` style, `neutral` base, Lucide icons — see `components.json`), Drizzle ORM + Neon Postgres (`db/schema.ts`, `db/index.ts`).
+
+**Current state:** early scaffold, not a working app yet.
+- `app/page.tsx` is still the default create-next-app homepage.
+- `app/(auth)/signin` and `/signup` are stub pages with no real logic.
+- No auth, issue tracking, or wiki features are implemented.
+- The schema defines `users` and `issues` (with `issue_status`/`issue_priority` enums), but nothing reads/writes it yet. `DATABASE_URL` isn't required for `npm run dev`.
+
+**Commands:** `npm run dev` / `build` / `start` / `lint`; `npm run db:generate` / `db:migrate` / `db:push` / `db:studio` (Drizzle Kit).
+
+**Conventions:** use the `@/components`, `@/components/ui`, `@/lib` path aliases from `components.json`; add new UI primitives via the shadcn CLI to stay consistent with the `new-york` style already in use.
+
 ## Git commit and push approval workflow
 
 For every future request to commit or push code:
