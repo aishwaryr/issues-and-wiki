@@ -4,4 +4,3 @@ import nextTs from "eslint-config-next/typescript";
 const eslintConfig = [...nextVitals, ...nextTs];
 
 export default eslintConfig;
-
