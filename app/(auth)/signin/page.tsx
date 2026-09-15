@@ -10,28 +10,18 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-export default function SignUpPage() {
+export default function SignInPage() {
   return (
     <Card>
       <CardHeader>
         <CardTitle>
-          <h1>Create an account</h1>
+          <h1>Welcome back</h1>
         </CardTitle>
-        <CardDescription>Enter your details to get started.</CardDescription>
+        <CardDescription>Sign in to your account to continue.</CardDescription>
       </CardHeader>
+
       <CardContent>
         <form className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="name">Name</Label>
-            <Input
-              id="name"
-              name="name"
-              type="text"
-              autoComplete="name"
-              required
-            />
-          </div>
-
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -50,34 +40,23 @@ export default function SignUpPage() {
               id="password"
               name="password"
               type="password"
-              // for password managers to suggest new password
-              autoComplete="new-password"
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirm password</Label>
-            <Input
-              id="confirmPassword"
-              name="confirmPassword"
-              type="password"
-              autoComplete="new-password"
+              // for password managers to fill saved password
+              autoComplete="current-password"
               required
             />
           </div>
 
           <Button className="w-full" type="button">
-            Sign up
+            Sign in
           </Button>
 
           <p className="text-center text-sm text-muted-foreground">
-            Already have an account?{" "}
+            Don&apos;t have an account?{" "}
             <Link
               className="text-primary underline-offset-4 hover:underline font-medium"
-              href="/signin"
+              href="/signup"
             >
-              Sign in
+              Sign up
             </Link>
           </p>
         </form>
