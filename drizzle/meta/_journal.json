@@ -15,6 +15,13 @@
       "when": 1789579977229,
       "tag": "0001_overrated_blue_shield",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789623263115,
+      "tag": "0002_awesome_karen_page",
+      "breakpoints": true
     }
   ]
 }
