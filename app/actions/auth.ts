@@ -9,8 +9,8 @@ import { getUserByEmail } from "@/lib/dal";
 import { hashPassword } from "@/lib/password";
 import { createSession } from "@/lib/session";
 
-// Bounds match the column widths in db/schema.ts — varchar(120) and varchar(255).
-// Without them Postgres rejects the insert instead of the form showing a field error.
+// Keep max lengths in sync with db/schema.ts (varchar 120 / 255) — otherwise Postgres
+// throws instead of the form showing a field error.
 const SignUpSchema = z
   .object({
     name: z
@@ -27,7 +27,7 @@ const SignUpSchema = z
     password: z
       .string()
       .min(8, "At least 8 characters")
-      // bcrypt truncates past 72 BYTES, so measure bytes, not characters.
+      // bytes, not chars — bcrypt truncates past 72 bytes (1 emoji = 4)
       .refine(
         (v) => Buffer.byteLength(v, "utf8") <= 72,
         "Password is too long (max 72 bytes)",
@@ -50,8 +50,8 @@ export async function signUp(
   _prevState: SignUpState,
   formData: FormData,
 ): Promise<SignUpState> {
-  // formData.get returns string | File | null. Coerce here so a missing or non-text
-  // field fails our own rules instead of zod's "expected string, received null".
+  // formData.get gives string | File | null — coerce, so missing fields hit my messages
+  // instead of zod's "expected string, received null".
   const field = (name: SignUpField) => String(formData.get(name) ?? "");
 
   const payload = {
@@ -71,20 +71,37 @@ export async function signUp(
 
   const { name, email, password } = result.data;
 
-  const existingUser = await getUserByEmail(email);
-  if (existingUser) {
-    return {
-      errors: { email: ["An account with this email already exists"] },
-      values,
-    };
+  const emailTaken = {
+    errors: { email: ["An account with this email already exists"] },
+    values,
+  };
+
+  // Fast path, not the guarantee: nicer message + skips the ~370ms hash below.
+  // Two requests can both pass this before either inserts (check-then-act race).
+  if (await getUserByEmail(email)) {
+    return emailTaken;
   }
 
   const passwordHash = await hashPassword(password);
 
+  // This is the actual guarantee — the unique index decides, so the race can't slip past.
+  // onConflictDoNothing = skip the row instead of throwing, so `returning` comes back
+  // empty and empty means "email taken".
+  // Keep `target: users.email`. Bare onConflictDoNothing() swallows EVERY unique conflict,
+  // so a future constraint would get mislabelled as "email taken" instead of throwing.
+  // Empty result can only mean an email conflict; anything else (not null, too long, fk)
+  // still throws.
   const [newUser] = await db
     .insert(users)
     .values({ name, email, passwordHash })
+    .onConflictDoNothing({ target: users.email })
     .returning({ id: users.id });
+
+  // tsconfig has no noUncheckedIndexedAccess, so TS types this as {id} not {id}|undefined
+  // and thinks the check is redundant. It isn't — DO NOTHING really can return no rows.
+  if (!newUser) {
+    return emailTaken;
+  }
 
   await createSession(newUser.id);
   redirect("/");
