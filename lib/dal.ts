@@ -28,8 +28,7 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
   return user ?? null;
 });
 
-// The one function allowed to read passwordHash. Only the auth actions call it, and the
-// result must never be returned to a client — pass it to verifyPassword and discard it.
+// Only place that selects passwordHash — auth actions only. Never return this to the client.
 export async function getUserByEmail(
   email: string,
 ): Promise<{ id: string; email: string; passwordHash: string } | null> {
