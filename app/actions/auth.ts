@@ -97,8 +97,6 @@ export async function signUp(
     .onConflictDoNothing({ target: users.email })
     .returning({ id: users.id });
 
-  // tsconfig has no noUncheckedIndexedAccess, so TS types this as {id} not {id}|undefined
-  // and thinks the check is redundant. It isn't — DO NOTHING really can return no rows.
   if (!newUser) {
     return emailTaken;
   }
