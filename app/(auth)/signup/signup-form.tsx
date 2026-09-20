@@ -1,17 +1,24 @@
 "use client";
 
 import Link from "next/link";
-
-import { useActionState, useEffect, useRef } from "react";
+import { Eye, EyeOff } from "lucide-react";
+import { useActionState, useEffect, useState, useRef } from "react";
 import { signUp, type SignUpState } from "@/app/actions/auth";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 
 const initialState: SignUpState = {};
 
 export function SignUpForm() {
+  const [showPassword, setShowPassword] = useState(false);
   const [state, formAction, pending] = useActionState(signUp, initialState);
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -76,19 +83,30 @@ export function SignUpForm() {
 
       <div className="space-y-2">
         <Label htmlFor="password">Password</Label>
-        <Input
-          id="password"
-          name="password"
-          type="password"
-          // for password managers to suggest new password
-          autoComplete="new-password"
-          required
-          minLength={8}
-          aria-invalid={!!state.errors?.password}
-          aria-describedby={
-            state.errors?.password ? "password-error" : undefined
-          }
-        />
+        <InputGroup>
+          <InputGroupInput
+            id="password"
+            name="password"
+            type={showPassword ? "text" : "password"}
+            // for password managers to suggest new password
+            autoComplete="new-password"
+            required
+            minLength={8}
+            aria-invalid={!!state.errors?.password}
+            aria-describedby={
+              state.errors?.password ? "password-error" : undefined
+            }
+          />
+          <InputGroupAddon align="inline-end">
+            <InputGroupButton
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? <EyeOff /> : <Eye />}
+            </InputGroupButton>
+          </InputGroupAddon>
+        </InputGroup>
         {state.errors?.password && (
           <p
             className="text-sm text-destructive"
