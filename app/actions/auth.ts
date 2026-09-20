@@ -11,33 +11,27 @@ import { createSession } from "@/lib/session";
 
 // Keep max lengths in sync with db/schema.ts (varchar 120 / 255) — otherwise Postgres
 // throws instead of the form showing a field error.
-const SignUpSchema = z
-  .object({
-    name: z
-      .string()
-      .trim()
-      .min(1, "Name is required")
-      .max(120, "Name is too long"),
-    email: z
-      .string()
-      .trim()
-      .toLowerCase()
-      .pipe(z.email("Enter a valid email"))
-      .refine((v) => v.length <= 255, "Email is too long"),
-    password: z
-      .string()
-      .min(8, "At least 8 characters")
-      // bytes, not chars — bcrypt truncates past 72 bytes (1 emoji = 4)
-      .refine(
-        (v) => Buffer.byteLength(v, "utf8") <= 72,
-        "Password is too long (max 72 bytes)",
-      ),
-    confirmPassword: z.string(),
-  })
-  .refine((v) => v.password === v.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
+const SignUpSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(1, "Name is required")
+    .max(120, "Name is too long"),
+  email: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .pipe(z.email("Enter a valid email"))
+    .refine((v) => v.length <= 255, "Email is too long"),
+  password: z
+    .string()
+    .min(8, "At least 8 characters")
+    // bytes, not chars — bcrypt truncates past 72 bytes (1 emoji = 4)
+    .refine(
+      (v) => Buffer.byteLength(v, "utf8") <= 72,
+      "Password is too long (max 72 bytes)",
+    ),
+});
 
 type SignUpField = keyof z.infer<typeof SignUpSchema>;
 
@@ -60,7 +54,6 @@ export async function signUp(
     name: field("name"),
     email: field("email"),
     password: field("password"),
-    confirmPassword: field("confirmPassword"),
   };
 
   const values = { name: payload.name, email: payload.email };

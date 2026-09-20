@@ -100,31 +100,6 @@ export function SignUpForm() {
         )}
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="confirmPassword">Confirm password</Label>
-        <Input
-          id="confirmPassword"
-          name="confirmPassword"
-          type="password"
-          autoComplete="new-password"
-          required
-          minLength={8}
-          aria-invalid={!!state.errors?.confirmPassword}
-          aria-describedby={
-            state.errors?.confirmPassword ? "confirmPassword-error" : undefined
-          }
-        />
-        {state.errors?.confirmPassword && (
-          <p
-            className="text-sm text-destructive"
-            role="alert"
-            id="confirmPassword-error"
-          >
-            {state.errors.confirmPassword[0]}
-          </p>
-        )}
-      </div>
-
       <Button className="w-full" type="submit" disabled={pending}>
         {pending ? "Creating account..." : "Sign up"}
       </Button>
