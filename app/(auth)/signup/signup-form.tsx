@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { signUp, type SignUpState } from "@/app/actions/auth";
 
 import { Button } from "@/components/ui/button";
@@ -13,9 +13,25 @@ const initialState: SignUpState = {};
 
 export function SignUpForm() {
   const [state, formAction, pending] = useActionState(signUp, initialState);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  // after a failed submit, move focus to the first field that errored
+  useEffect(() => {
+    const firstInvalid = state.errors && Object.keys(state.errors)[0];
+    if (!firstInvalid) return;
+    formRef.current
+      ?.querySelector<HTMLInputElement>(`[name="${firstInvalid}"]`)
+      ?.focus();
+  }, [state]);
 
   return (
-    <form action={formAction} className="space-y-6">
+    <form ref={formRef} action={formAction} className="space-y-6">
+      {state.message && (
+        <p role="alert" className="text-sm text-destructive">
+          {state.message}
+        </p>
+      )}
+
       <div className="space-y-2">
         <Label htmlFor="name">Name</Label>
         <Input
@@ -24,12 +40,14 @@ export function SignUpForm() {
           type="text"
           autoComplete="name"
           required
+          autoFocus
+          maxLength={120}
           defaultValue={state.values?.name}
           aria-invalid={!!state.errors?.name}
           aria-describedby={state.errors?.name ? "name-error" : undefined}
         />
         {state.errors?.name && (
-          <p id="name-error" className="text-sm text-destructive">
+          <p id="name-error" role="alert" className="text-sm text-destructive">
             {state.errors.name[0]}
           </p>
         )}
@@ -44,12 +62,13 @@ export function SignUpForm() {
           placeholder="you@example.com"
           autoComplete="email"
           required
+          maxLength={255}
           defaultValue={state.values?.email}
           aria-invalid={!!state.errors?.email}
           aria-describedby={state.errors?.email ? "email-error" : undefined}
         />
         {state.errors?.email && (
-          <p className="text-sm text-destructive" id="email-error">
+          <p className="text-sm text-destructive" role="alert" id="email-error">
             {state.errors.email[0]}
           </p>
         )}
@@ -64,11 +83,18 @@ export function SignUpForm() {
           // for password managers to suggest new password
           autoComplete="new-password"
           required
+          minLength={8}
           aria-invalid={!!state.errors?.password}
-          aria-describedby={state.errors?.password ? "password-error" : undefined}
+          aria-describedby={
+            state.errors?.password ? "password-error" : undefined
+          }
         />
         {state.errors?.password && (
-          <p className="text-sm text-destructive" id="password-error">
+          <p
+            className="text-sm text-destructive"
+            role="alert"
+            id="password-error"
+          >
             {state.errors.password[0]}
           </p>
         )}
@@ -82,13 +108,18 @@ export function SignUpForm() {
           type="password"
           autoComplete="new-password"
           required
+          minLength={8}
           aria-invalid={!!state.errors?.confirmPassword}
           aria-describedby={
             state.errors?.confirmPassword ? "confirmPassword-error" : undefined
           }
         />
         {state.errors?.confirmPassword && (
-          <p className="text-sm text-destructive" id="confirmPassword-error">
+          <p
+            className="text-sm text-destructive"
+            role="alert"
+            id="confirmPassword-error"
+          >
             {state.errors.confirmPassword[0]}
           </p>
         )}

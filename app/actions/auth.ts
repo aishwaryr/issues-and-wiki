@@ -43,6 +43,8 @@ type SignUpField = keyof z.infer<typeof SignUpSchema>;
 
 export type SignUpState = {
   errors?: Partial<Record<SignUpField, string[]>>;
+  // form-level error, for anything that isn't tied to one field
+  message?: string;
   values?: { name: string; email: string };
 };
 
