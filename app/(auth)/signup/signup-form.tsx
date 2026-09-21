@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useActionState, useState, useEffect } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
 
@@ -18,9 +18,11 @@ import {
 const initialState: SignUpState = {};
 
 export function SignUpForm() {
-  const [showPassword, setShowPassword] = useState(false);
-  const [state, formAction, pending] = useActionState(signUp, initialState);
   const formRef = useRef<HTMLFormElement>(null);
+  const [state, formAction, pending] = useActionState(signUp, initialState);
+
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     const firstInvalid = state.errors && Object.keys(state.errors)[0];
@@ -87,6 +89,8 @@ export function SignUpForm() {
             id="password"
             name="password"
             type={showPassword ? "text" : "password"}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             // for password managers to suggest new password
             autoComplete="new-password"
             required
