@@ -1,10 +1,10 @@
 "use client";
 
+import { useRef, useActionState, useState, useEffect } from "react";
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
-import { useActionState, useEffect, useState, useRef } from "react";
-import { signUp, type SignUpState } from "@/app/actions/auth";
 
+import { signUp, type SignUpState } from "@/app/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,23 +22,22 @@ export function SignUpForm() {
   const [state, formAction, pending] = useActionState(signUp, initialState);
   const formRef = useRef<HTMLFormElement>(null);
 
-  // after a failed submit, move focus to the first field that errored
   useEffect(() => {
     const firstInvalid = state.errors && Object.keys(state.errors)[0];
     if (!firstInvalid) return;
+
     formRef.current
       ?.querySelector<HTMLInputElement>(`[name="${firstInvalid}"]`)
       ?.focus();
   }, [state]);
 
   return (
-    <form ref={formRef} action={formAction} className="space-y-6">
+    <form action={formAction} className="space-y-6" ref={formRef}>
       {state.message && (
         <p role="alert" className="text-sm text-destructive">
           {state.message}
         </p>
       )}
-
       <div className="space-y-2">
         <Label htmlFor="name">Name</Label>
         <Input
