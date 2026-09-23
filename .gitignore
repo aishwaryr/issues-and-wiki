@@ -32,3 +32,8 @@ next-env.d.ts
 *.key
 *.p12
 *.pfx
+
+# cypress artifacts
+/cypress/screenshots
+/cypress/videos
+/cypress/downloads
