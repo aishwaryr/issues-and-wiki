@@ -6,8 +6,10 @@ import { flattenError, z } from "zod";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { getUserByEmail } from "@/lib/dal";
-import { hashPassword } from "@/lib/password";
+import { hashPassword, verifyPassword } from "@/lib/password";
 import { createSession } from "@/lib/session";
+
+// ---------- sign-up ----------
 
 // Keep max lengths in sync with db/schema.ts (varchar 120 / 255) — otherwise Postgres
 // throws instead of the form showing a field error.
@@ -97,5 +99,54 @@ export async function signUp(
   }
 
   await createSession(newUser.id);
+  redirect("/");
+}
+
+// ---------- sign-in ----------
+
+const SignInSchema = z.object({
+  email: z.string().trim().toLowerCase().pipe(z.email("Enter a valid email")),
+  password: z.string().min(1, "Password is required"),
+});
+
+type SignInField = keyof z.infer<typeof SignInSchema>;
+
+export type SignInState = {
+  errors?: Partial<Record<SignInField, string[]>>;
+  message?: string;
+  values?: { email: string };
+};
+
+export async function signIn(
+  _prevState: SignInState,
+  formData: FormData,
+): Promise<SignInState> {
+  const field = (name: SignInField) => String(formData.get(name) ?? "");
+
+  const payload = {
+    email: field("email"),
+    password: field("password"),
+  };
+  const values = { email: payload.email };
+
+  const result = SignInSchema.safeParse(payload);
+
+  if (!result.success) {
+    return { errors: flattenError(result.error).fieldErrors, values };
+  }
+  const { email, password } = result.data;
+
+  const invalidEmailPassword = {
+    message: "Invalid email or password",
+    values,
+  };
+
+  const user = await getUserByEmail(email);
+  if (!user) return invalidEmailPassword;
+
+  const passwordCheck = await verifyPassword(password, user.passwordHash);
+  if (!passwordCheck) return invalidEmailPassword;
+
+  await createSession(user.id);
   redirect("/");
 }
