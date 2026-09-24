@@ -42,3 +42,45 @@ describe("auth happy paths", () => {
     cy.location("pathname", { timeout: REDIRECT_TIMEOUT }).should("eq", "/");
   });
 });
+
+describe("route guards", () => {
+  it("sends signed-out visitors from / to /signin", () => {
+    cy.visit("/");
+
+    cy.location("pathname", { timeout: REDIRECT_TIMEOUT }).should(
+      "eq",
+      "/signin",
+    );
+  });
+
+  it("sends signed-in users away from /signin and /signup", () => {
+    signUp(newAccount());
+    cy.location("pathname", { timeout: REDIRECT_TIMEOUT }).should("eq", "/");
+
+    cy.visit("/signin");
+    cy.location("pathname", { timeout: REDIRECT_TIMEOUT }).should("eq", "/");
+
+    cy.visit("/signup");
+    cy.location("pathname", { timeout: REDIRECT_TIMEOUT }).should("eq", "/");
+  });
+});
+
+describe("logout", () => {
+  it("logs out from the navbar and locks the dashboard again", () => {
+    signUp(newAccount());
+    cy.location("pathname", { timeout: REDIRECT_TIMEOUT }).should("eq", "/");
+
+    cy.contains("button", "Log out").click();
+    cy.location("pathname", { timeout: REDIRECT_TIMEOUT }).should(
+      "eq",
+      "/signin",
+    );
+    cy.getCookie("session").should("not.exist");
+
+    cy.visit("/");
+    cy.location("pathname", { timeout: REDIRECT_TIMEOUT }).should(
+      "eq",
+      "/signin",
+    );
+  });
+});
