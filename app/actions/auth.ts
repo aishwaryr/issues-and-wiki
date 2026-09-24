@@ -99,7 +99,14 @@ export async function signUp(
 
 const SignInSchema = z.object({
   email: z.string().trim().toLowerCase().pipe(z.email("Enter a valid email")),
-  password: z.string().min(1, "Password is required"),
+  password: z
+    .string()
+    .min(1, "Password is required")
+    // bcrypt ignores bytes past 72, so a longer input would match on its first 72
+    .refine(
+      (v) => Buffer.byteLength(v, "utf8") <= 72,
+      "Password is too long (max 72 bytes)",
+    ),
 });
 
 type SignInField = keyof z.infer<typeof SignInSchema>;
