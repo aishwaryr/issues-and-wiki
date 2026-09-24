@@ -7,7 +7,7 @@ import { db } from "@/db";
 import { users } from "@/db/schema";
 import { getUserByEmail } from "@/lib/dal";
 import { hashPassword, verifyPassword } from "@/lib/password";
-import { createSession } from "@/lib/session";
+import { createSession, deleteSession } from "@/lib/session";
 
 // ---------- sign-up ----------
 
@@ -149,4 +149,11 @@ export async function signIn(
 
   await createSession(user.id);
   redirect("/");
+}
+
+// ---------- sign-out ----------
+
+export async function signOut() {
+  await deleteSession();
+  redirect("/signin");
 }
