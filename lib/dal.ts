@@ -1,6 +1,7 @@
 import "server-only";
 
 import { cache } from "react";
+import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
 
 import { db } from "@/db";
@@ -43,4 +44,12 @@ export async function getUserByEmail(
     .limit(1);
 
   return user ?? null;
+}
+
+export async function requireUser(): Promise<CurrentUser> {
+  const user = await getCurrentUser();
+  if (!user) {
+    redirect("/signin");
+  }
+  return user;
 }

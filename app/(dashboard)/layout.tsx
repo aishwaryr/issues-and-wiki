@@ -1,17 +1,14 @@
 import type { ReactNode } from "react";
-import { redirect } from "next/navigation";
 
 import { Navbar } from "@/components/navbar";
-import { getCurrentUser } from "@/lib/dal";
+import { requireUser } from "@/lib/dal";
 
 export default async function DashboardLayout({
   children,
 }: {
   children: ReactNode;
 }) {
-  if (!(await getCurrentUser())) {
-    redirect("/signin");
-  }
+  await requireUser();
   return (
     <>
       <Navbar />
