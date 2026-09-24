@@ -6,6 +6,7 @@ import { flattenError, z } from "zod";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { getUserByEmail } from "@/lib/dal";
+import { readForm } from "@/lib/form-data";
 import { hashPassword, verifyPassword } from "@/lib/password";
 import { createSession, deleteSession } from "@/lib/session";
 
@@ -48,15 +49,7 @@ export async function signUp(
   _prevState: SignUpState,
   formData: FormData,
 ): Promise<SignUpState> {
-  // formData.get gives string | File | null — coerce, so missing fields hit my messages
-  // instead of zod's "expected string, received null".
-  const field = (name: SignUpField) => String(formData.get(name) ?? "");
-
-  const payload = {
-    name: field("name"),
-    email: field("email"),
-    password: field("password"),
-  };
+  const payload = readForm(formData, ["name", "email", "password"]);
 
   const values = { name: payload.name, email: payload.email };
 
@@ -121,12 +114,7 @@ export async function signIn(
   _prevState: SignInState,
   formData: FormData,
 ): Promise<SignInState> {
-  const field = (name: SignInField) => String(formData.get(name) ?? "");
-
-  const payload = {
-    email: field("email"),
-    password: field("password"),
-  };
+  const payload = readForm(formData, ["email", "password"]);
   const values = { email: payload.email };
 
   const result = SignInSchema.safeParse(payload);
