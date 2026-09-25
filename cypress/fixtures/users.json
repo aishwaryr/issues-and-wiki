@@ -1,0 +1,17 @@
+[
+  {
+    "name": "E2E Alice",
+    "email": "e2e.alice@example.com",
+    "password": "alice-e2e-password"
+  },
+  {
+    "name": "E2E Bob",
+    "email": "e2e.bob@example.com",
+    "password": "bob-e2e-password"
+  },
+  {
+    "name": "E2E Carol",
+    "email": "e2e.carol@example.com",
+    "password": "carol-e2e-password"
+  }
+]
