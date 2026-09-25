@@ -19,7 +19,7 @@ Issues + Wiki: a work-tracking and shared-documentation app, built while followi
 - Routes: `app/(auth)` is public and redirects signed-in users to `/`; `app/(dashboard)` is guarded and renders the navbar. `/` is a placeholder dashboard.
 - Schema: `users`, `issues`, `sessions`, with migrations in `drizzle/`. `DATABASE_URL` in `.env.local` is required — every page reads the session.
 
-**Commands:** `npm run dev` / `build` / `start` / `lint`; `npm run db:generate` / `db:migrate` / `db:push` / `db:studio` (Drizzle Kit); `npm run cy:run` (Cypress e2e, needs the dev server). Node 24 via `.nvmrc`.
+**Commands:** `npm run dev` / `build` / `start` / `lint`; `npm run db:generate` / `db:migrate` / `db:push` / `db:studio` (Drizzle Kit); `npm run cy:run` (all Cypress e2e, needs the dev server) or `npx cypress run --spec cypress/e2e/<feature>.cy.ts` for one feature. Node 24 via `.nvmrc`.
 
 **Conventions:** use the `@/components`, `@/components/ui`, `@/lib` path aliases from `components.json`; add new UI primitives via the shadcn CLI to stay consistent with the `new-york` style already in use.
 

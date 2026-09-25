@@ -29,5 +29,8 @@ Open http://localhost:3000. Node 24 is pinned in `.nvmrc`.
 
 ```bash
 npm run lint
-npm run cy:run   # end-to-end tests; needs the dev server running
+npm run cy:run   # all end-to-end tests; needs the dev server running
+npx cypress run --spec cypress/e2e/signin.cy.ts   # one feature
 ```
+
+Specs live in `cypress/e2e/`, one per feature. Sign-in, logout and guard specs use the accounts in `cypress/fixtures/users.json`, which they seed themselves.
