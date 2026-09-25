@@ -14,13 +14,12 @@ Issues + Wiki: a work-tracking and shared-documentation app, built while followi
 
 **Stack:** Next.js App Router (v16, webpack dev/build), React 19, TypeScript, Tailwind CSS v4, shadcn/ui (`new-york` style, `neutral` base, Lucide icons — see `components.json`), Drizzle ORM + Neon Postgres (`db/schema.ts`, `db/index.ts`).
 
-**Current state:** early scaffold, not a working app yet.
-- `app/page.tsx` is still the default create-next-app homepage.
-- `app/(auth)/signin` and `/signup` are stub pages with no real logic.
-- No auth, issue tracking, or wiki features are implemented.
-- The schema defines `users` and `issues` (with `issue_status`/`issue_priority` enums), but nothing reads/writes it yet. `DATABASE_URL` isn't required for `npm run dev`.
+**Current state:** auth is done; the issues and wiki modules are next.
+- Auth: sign-up, sign-in and sign-out server actions in `app/actions/auth.ts`; database sessions in `lib/session.ts`, bcrypt in `lib/password.ts`, a server-only data access layer in `lib/dal.ts`.
+- Routes: `app/(auth)` is public and redirects signed-in users to `/`; `app/(dashboard)` is guarded and renders the navbar. `/` is a placeholder dashboard.
+- Schema: `users`, `issues`, `sessions`, with migrations in `drizzle/`. `DATABASE_URL` in `.env.local` is required — every page reads the session.
 
-**Commands:** `npm run dev` / `build` / `start` / `lint`; `npm run db:generate` / `db:migrate` / `db:push` / `db:studio` (Drizzle Kit).
+**Commands:** `npm run dev` / `build` / `start` / `lint`; `npm run db:generate` / `db:migrate` / `db:push` / `db:studio` (Drizzle Kit); `npm run cy:run` (all Cypress e2e, needs the dev server) or `npx cypress run --spec cypress/e2e/<feature>.cy.ts` for one feature. Node 24 via `.nvmrc`.
 
 **Conventions:** use the `@/components`, `@/components/ui`, `@/lib` path aliases from `components.json`; add new UI primitives via the shadcn CLI to stay consistent with the `new-york` style already in use.
 

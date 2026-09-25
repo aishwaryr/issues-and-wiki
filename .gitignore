@@ -32,3 +32,14 @@ next-env.d.ts
 *.key
 *.p12
 *.pfx
+
+# cypress artifacts
+/cypress/screenshots
+/cypress/videos
+/cypress/downloads
+
+# playwright artifacts
+/test-results
+/playwright-report
+/blob-report
+/playwright/.cache
