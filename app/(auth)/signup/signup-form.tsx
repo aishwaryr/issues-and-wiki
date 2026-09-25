@@ -2,18 +2,12 @@
 
 import { useActionState, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Eye, EyeOff } from "lucide-react";
 
 import { signUp, type SignUpState } from "@/app/actions/auth";
+import { PasswordInput } from "@/components/password-input";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupButton,
-  InputGroupInput,
-} from "@/components/ui/input-group";
 
 const initialState: SignUpState = {};
 
@@ -22,7 +16,6 @@ export function SignUpForm() {
   const [state, formAction, pending] = useActionState(signUp, initialState);
 
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     const firstInvalid = state.errors && Object.keys(state.errors)[0];
@@ -84,32 +77,20 @@ export function SignUpForm() {
 
       <div className="space-y-2">
         <Label htmlFor="password">Password</Label>
-        <InputGroup>
-          <InputGroupInput
-            id="password"
-            name="password"
-            type={showPassword ? "text" : "password"}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            // for password managers to suggest new password
-            autoComplete="new-password"
-            required
-            minLength={8}
-            aria-invalid={!!state.errors?.password}
-            aria-describedby={
-              state.errors?.password ? "password-error" : undefined
-            }
-          />
-          <InputGroupAddon align="inline-end">
-            <InputGroupButton
-              type="button"
-              onClick={() => setShowPassword((v) => !v)}
-              aria-label={showPassword ? "Hide password" : "Show password"}
-            >
-              {showPassword ? <EyeOff /> : <Eye />}
-            </InputGroupButton>
-          </InputGroupAddon>
-        </InputGroup>
+        <PasswordInput
+          id="password"
+          name="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          // for password managers to suggest new password
+          autoComplete="new-password"
+          required
+          minLength={8}
+          aria-invalid={!!state.errors?.password}
+          aria-describedby={
+            state.errors?.password ? "password-error" : undefined
+          }
+        />
         {state.errors?.password && (
           <p
             className="text-sm text-destructive"

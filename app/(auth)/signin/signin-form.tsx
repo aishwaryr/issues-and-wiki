@@ -1,25 +1,18 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState } from "react";
 import Link from "next/link";
-import { Eye, EyeOff } from "lucide-react";
 
 import { signIn, type SignInState } from "@/app/actions/auth";
+import { PasswordInput } from "@/components/password-input";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupButton,
-  InputGroupInput,
-} from "@/components/ui/input-group";
 import { Label } from "@/components/ui/label";
 
 const initialState: SignInState = {};
 
 export function SignInForm() {
   const [state, formAction, pending] = useActionState(signIn, initialState);
-  const [showPassword, setShowPassword] = useState(false);
 
   return (
     <form className="space-y-6" action={formAction}>
@@ -50,29 +43,16 @@ export function SignInForm() {
 
       <div className="space-y-2">
         <Label htmlFor="password">Password</Label>
-        <InputGroup>
-          <InputGroupInput
-            id="password"
-            name="password"
-            type={showPassword ? "text" : "password"}
-            // for password managers to fill saved password
-            autoComplete="current-password"
-            required
-            aria-invalid={!!state.errors?.password}
-            aria-describedby={
-              state.errors?.password ? "password-error" : undefined
-            }
-          />
-          <InputGroupAddon align="inline-end">
-            <InputGroupButton
-              type="button"
-              onClick={() => setShowPassword((v) => !v)}
-              aria-label={showPassword ? "Hide password" : "Show password"}
-            >
-              {showPassword ? <EyeOff /> : <Eye />}
-            </InputGroupButton>
-          </InputGroupAddon>
-        </InputGroup>
+        <PasswordInput
+          id="password"
+          name="password"
+          autoComplete="current-password"
+          required
+          aria-invalid={!!state.errors?.password}
+          aria-describedby={
+            state.errors?.password ? "password-error" : undefined
+          }
+        />
         {state.errors?.password && (
           <p
             id="password-error"
