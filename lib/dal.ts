@@ -2,11 +2,13 @@ import "server-only";
 
 import { cache } from "react";
 import { redirect } from "next/navigation";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 
 import { db } from "@/db";
-import { users } from "@/db/schema";
+import { issues, users } from "@/db/schema";
 import { getSession } from "@/lib/session";
+
+// Users
 
 export type CurrentUser = {
   id: string;
@@ -52,4 +54,24 @@ export async function requireUser(): Promise<CurrentUser> {
     redirect("/signin");
   }
   return user;
+}
+
+// Issues
+
+export async function listIssues() {
+  await requireUser();
+
+  // LEFT join keeps unassigned issues (assigneeName is null); one query, no N+1.
+  return db
+    .select({
+      id: issues.id,
+      title: issues.title,
+      status: issues.status,
+      priority: issues.priority,
+      createdAt: issues.createdAt,
+      assigneeName: users.name,
+    })
+    .from(issues)
+    .leftJoin(users, eq(issues.assigneeId, users.id))
+    .orderBy(desc(issues.createdAt));
 }
