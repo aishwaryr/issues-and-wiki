@@ -4,10 +4,18 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { PRIORITY_OPTIONS, STATUS_OPTIONS } from "@/lib/issues";
 
-const selectClassName =
-  "h-9 rounded-md border border-input bg-transparent px-3 text-sm shadow-xs focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50";
+// Radix Select doesn't allow "" as an item value, so "All" uses a sentinel
+// that updateFilter turns into "remove this key from the URL".
+const ALL = "all";
 
 export function IssueFilters() {
   const router = useRouter();
@@ -20,7 +28,7 @@ export function IssueFilters() {
 
   function updateFilter(key: "status" | "priority", value: string) {
     const newParams = new URLSearchParams(searchParams.toString());
-    if (value === "") {
+    if (value === ALL) {
       newParams.delete(key);
     } else {
       newParams.set(key, value);
@@ -42,36 +50,42 @@ export function IssueFilters() {
     >
       <div className="grid gap-1.5">
         <Label htmlFor="status">Status</Label>
-        <select
-          id="status"
-          defaultValue={status}
-          onChange={(e) => updateFilter("status", e.target.value)}
-          className={selectClassName}
+        <Select
+          defaultValue={status || ALL}
+          onValueChange={(value) => updateFilter("status", value)}
         >
-          <option value="">All</option>
-          {STATUS_OPTIONS.map(({ value, label }) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger id="status" className="w-36">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={ALL}>All</SelectItem>
+            {STATUS_OPTIONS.map(({ value, label }) => (
+              <SelectItem key={value} value={value}>
+                {label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="grid gap-1.5">
         <Label htmlFor="priority">Priority</Label>
-        <select
-          id="priority"
-          defaultValue={priority}
-          onChange={(e) => updateFilter("priority", e.target.value)}
-          className={selectClassName}
+        <Select
+          defaultValue={priority || ALL}
+          onValueChange={(value) => updateFilter("priority", value)}
         >
-          <option value="">All</option>
-          {PRIORITY_OPTIONS.map(({ value, label }) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger id="priority" className="w-36">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={ALL}>All</SelectItem>
+            {PRIORITY_OPTIONS.map(({ value, label }) => (
+              <SelectItem key={value} value={value}>
+                {label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {hasFilters && (
