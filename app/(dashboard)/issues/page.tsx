@@ -4,11 +4,17 @@ import { Plus } from "lucide-react";
 
 import { EmptyState } from "@/components/empty-state";
 import { IssueFilters } from "@/components/issue-filters";
+import { UserAvatar } from "@/components/user-avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { listIssues } from "@/lib/dal";
-import { PRIORITY_LABELS, STATUS_LABELS } from "@/lib/issues";
+import {
+  PRIORITY_BADGE_CLASSES,
+  PRIORITY_LABELS,
+  STATUS_BADGE_CLASSES,
+  STATUS_LABELS,
+} from "@/lib/issues";
 
 export const metadata: Metadata = { title: "Issues" };
 
@@ -65,15 +71,26 @@ export default async function IssuesPage() {
 
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline">
+                      {/* outline variant = neutral base; the color classes override
+                          its border/background/text (cn merges conflicting classes) */}
+                      <Badge
+                        variant="outline"
+                        className={STATUS_BADGE_CLASSES[issue.status]}
+                      >
                         {STATUS_LABELS[issue.status]}
                       </Badge>
-                      <Badge variant="secondary">
+                      <Badge
+                        variant="outline"
+                        className={PRIORITY_BADGE_CLASSES[issue.priority]}
+                      >
                         {PRIORITY_LABELS[issue.priority]}
                       </Badge>
                     </div>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
                       {/* assigneeName is null when unassigned (left join) */}
+                      {issue.assigneeName && (
+                        <UserAvatar name={issue.assigneeName} />
+                      )}
                       {issue.assigneeName ?? "Unassigned"} ·{" "}
                       {/* Fixed locale + format so the date looks the same everywhere */}
                       {issue.createdAt.toLocaleDateString("en-US", {
