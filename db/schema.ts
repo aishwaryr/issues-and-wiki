@@ -1,6 +1,7 @@
 import { relations } from "drizzle-orm";
 import {
   index,
+  integer,
   pgEnum,
   pgTable,
   text,
@@ -48,6 +49,10 @@ export const issuePriority = pgEnum("issue_priority", [
 
 export const issues = pgTable("issues", {
   id: uuid("id").defaultRandom().primaryKey(),
+  // Human-readable key (shown as ISS-12, used in URLs). The UUID stays the
+  // primary key and the target of foreign keys. Identity = Postgres assigns
+  // the next number on insert; "always" means the app can't set it.
+  number: integer("number").generatedAlwaysAsIdentity().notNull().unique(),
   title: varchar("title", { length: 180 }).notNull(),
   description: text("description"),
   status: issueStatus("status").default("backlog").notNull(),

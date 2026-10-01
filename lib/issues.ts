@@ -53,3 +53,11 @@ export const PRIORITY_BADGE_CLASSES: Record<IssuePriority, string> = {
   high: "border-transparent bg-orange-500/15 text-orange-700 dark:text-orange-300",
   urgent: "border-transparent bg-red-500/15 text-red-700 dark:text-red-300",
 };
+
+// Key
+// Issues are shown and linked by a short human-readable key (ISS-12) built from
+// issues.number; the UUID stays internal. URLs carry just the number: /issues/12.
+export const ISSUE_KEY_PREFIX = "ISS";
+export function formatIssueKey(number: number) {
+  return `${ISSUE_KEY_PREFIX}-${number}`;
+}

@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { listIssues } from "@/lib/dal";
 import {
+  formatIssueKey,
   PRIORITY_BADGE_CLASSES,
   PRIORITY_LABELS,
   STATUS_BADGE_CLASSES,
@@ -60,14 +61,20 @@ export default async function IssuesPage() {
               {/* The whole card is the link: a bigger click target, and one tab stop
                   per issue. The focus ring sits on the link, since it's what gets focus. */}
               <Link
-                href={`/issues/${issue.id}`}
+                href={`/issues/${issue.number}`}
                 className="block rounded-xl focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
               >
                 {/* shadcn Card defaults to roomy page-panel spacing (py-6 gap-6);
                     tightened here so the list reads like rows. */}
                 <Card className="gap-2 px-4 py-3 transition-colors hover:bg-muted/50">
                   {/* truncate = one line with "…"; min-w-0 lets it shrink inside flex */}
-                  <p className="min-w-0 truncate font-medium">{issue.title}</p>
+                  <p className="flex min-w-0 items-baseline gap-2">
+                    {/* Key first, monospace + muted, like Jira/Linear (ISS-12) */}
+                    <span className="shrink-0 font-mono text-xs text-muted-foreground">
+                      {formatIssueKey(issue.number)}
+                    </span>
+                    <span className="truncate font-medium">{issue.title}</span>
+                  </p>
 
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-2">

@@ -65,6 +65,7 @@ export async function listIssues() {
   return db
     .select({
       id: issues.id,
+      number: issues.number,
       title: issues.title,
       status: issues.status,
       priority: issues.priority,
