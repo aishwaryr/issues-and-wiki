@@ -49,10 +49,13 @@ function SelectTrigger({
   )
 }
 
+// Default changed from Radix's "item-aligned" (macOS-style: the selected item is
+// placed over the trigger, shifting the list) to "popper" (always drops down
+// below the trigger). Note: re-running `npx shadcn add select` overwrites this.
 function SelectContent({
   className,
   children,
-  position = "item-aligned",
+  position = "popper",
   align = "center",
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Content>) {
