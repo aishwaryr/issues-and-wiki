@@ -37,6 +37,7 @@ export const STATUS_BADGE_CLASSES: Record<IssueStatus, string> = {
 export const ISSUE_PRIORITIES = issuePriority.enumValues;
 export type IssuePriority = (typeof ISSUE_PRIORITIES)[number];
 export const PRIORITY_LABELS: Record<IssuePriority, string> = {
+  none: "No priority",
   low: "Low",
   medium: "Medium",
   high: "High",
@@ -47,6 +48,7 @@ export const PRIORITY_OPTIONS = ISSUE_PRIORITIES.map((value) => ({
   label: PRIORITY_LABELS[value],
 }));
 export const PRIORITY_BADGE_CLASSES: Record<IssuePriority, string> = {
+  none: "border-dashed text-muted-foreground", // temporary until the icon refactor
   low: "border-transparent bg-zinc-500/15 text-zinc-700 dark:text-zinc-300",
   medium:
     "border-transparent bg-amber-500/15 text-amber-700 dark:text-amber-300",

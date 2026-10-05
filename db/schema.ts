@@ -41,6 +41,7 @@ export const issueStatus = pgEnum("issue_status", [
 ]);
 
 export const issuePriority = pgEnum("issue_priority", [
+  "none",
   "low",
   "medium",
   "high",
@@ -56,7 +57,7 @@ export const issues = pgTable("issues", {
   title: varchar("title", { length: 180 }).notNull(),
   description: text("description"),
   status: issueStatus("status").default("backlog").notNull(),
-  priority: issuePriority("priority").default("medium").notNull(),
+  priority: issuePriority("priority").default("none").notNull(),
   assigneeId: uuid("assignee_id").references(() => users.id, {
     onDelete: "set null",
   }),
