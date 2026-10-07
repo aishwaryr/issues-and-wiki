@@ -1,0 +1,1 @@
+ALTER TYPE "public"."issue_priority" ADD VALUE 'none' BEFORE 'low';
