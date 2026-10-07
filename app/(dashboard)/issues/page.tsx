@@ -12,9 +12,9 @@ import { listIssues } from "@/lib/dal";
 import {
   formatIssueKey,
   PRIORITY_BADGE_CLASSES,
-  PRIORITY_LABELS,
+  PRIORITY_CONFIG,
   STATUS_BADGE_CLASSES,
-  STATUS_LABELS,
+  STATUS_CONFIG,
 } from "@/lib/issues";
 
 export const metadata: Metadata = { title: "Issues" };
@@ -84,13 +84,13 @@ export default async function IssuesPage() {
                         variant="outline"
                         className={STATUS_BADGE_CLASSES[issue.status]}
                       >
-                        {STATUS_LABELS[issue.status]}
+                        {STATUS_CONFIG[issue.status].label}
                       </Badge>
                       <Badge
                         variant="outline"
                         className={PRIORITY_BADGE_CLASSES[issue.priority]}
                       >
-                        {PRIORITY_LABELS[issue.priority]}
+                        {PRIORITY_CONFIG[issue.priority].label}
                       </Badge>
                     </div>
                     <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
