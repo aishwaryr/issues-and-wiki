@@ -41,5 +41,12 @@
     "eslint-config-next": "^16.3.4",
     "tailwindcss": "^4.1.12",
     "typescript": "^5.9.2"
+  },
+  "allowScripts": {
+    "esbuild@0.18.20": true,
+    "esbuild@0.25.12": true,
+    "esbuild@0.28.2": true,
+    "cypress@16.1.0": true,
+    "unrs-resolver@1.12.2": true
   }
 }
