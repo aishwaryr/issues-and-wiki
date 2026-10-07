@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { PriorityIcon, StatusIcon } from "@/components/issue-icons";
 import { PRIORITY_OPTIONS, STATUS_OPTIONS } from "@/lib/issues";
 
 // Radix Select doesn't allow "" as an item value, so "All" uses a sentinel
@@ -61,6 +62,8 @@ export function IssueFilters() {
             <SelectItem value={ALL}>All</SelectItem>
             {STATUS_OPTIONS.map(({ value, label }) => (
               <SelectItem key={value} value={value}>
+                {/* aria-hidden: the text label already names the option */}
+                <StatusIcon status={value} aria-hidden />
                 {label}
               </SelectItem>
             ))}
@@ -81,6 +84,7 @@ export function IssueFilters() {
             <SelectItem value={ALL}>All</SelectItem>
             {PRIORITY_OPTIONS.map(({ value, label }) => (
               <SelectItem key={value} value={value}>
+                <PriorityIcon priority={value} aria-hidden />
                 {label}
               </SelectItem>
             ))}

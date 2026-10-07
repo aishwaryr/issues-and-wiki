@@ -4,18 +4,12 @@ import { Plus } from "lucide-react";
 
 import { EmptyState } from "@/components/empty-state";
 import { IssueFilters } from "@/components/issue-filters";
+import { PriorityIcon, StatusIcon } from "@/components/issue-icons";
 import { UserAvatar } from "@/components/user-avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { listIssues } from "@/lib/dal";
-import {
-  formatIssueKey,
-  PRIORITY_BADGE_CLASSES,
-  PRIORITY_CONFIG,
-  STATUS_BADGE_CLASSES,
-  STATUS_CONFIG,
-} from "@/lib/issues";
+import { formatIssueKey } from "@/lib/issues";
 
 export const metadata: Metadata = { title: "Issues" };
 
@@ -64,49 +58,33 @@ export default async function IssuesPage() {
                 href={`/issues/${issue.number}`}
                 className="block rounded-xl focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
               >
-                {/* shadcn Card defaults to roomy page-panel spacing (py-6 gap-6);
-                    tightened here so the list reads like rows. */}
-                <Card className="gap-2 px-4 py-3 transition-colors hover:bg-muted/50">
+                {/* One Linear-style row: priority, key, status, title, then
+                    assignee and date pushed right. flex-row/py-2.5 override the
+                    Card's roomy column default so the list reads like rows. */}
+                <Card className="flex-row items-center gap-3 px-4 py-2.5 transition-colors hover:bg-muted/50">
+                  <PriorityIcon priority={issue.priority} />
+                  {/* Key monospace + muted, like Jira/Linear (ISS-12) */}
+                  <span className="shrink-0 font-mono text-xs text-muted-foreground">
+                    {formatIssueKey(issue.number)}
+                  </span>
+                  <StatusIcon status={issue.status} />
                   {/* truncate = one line with "…"; min-w-0 lets it shrink inside flex */}
-                  <p className="flex min-w-0 items-baseline gap-2">
-                    {/* Key first, monospace + muted, like Jira/Linear (ISS-12) */}
-                    <span className="shrink-0 font-mono text-xs text-muted-foreground">
-                      {formatIssueKey(issue.number)}
-                    </span>
-                    <span className="truncate font-medium">{issue.title}</span>
-                  </p>
-
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      {/* outline variant = neutral base; the color classes override
-                          its border/background/text (cn merges conflicting classes) */}
-                      <Badge
-                        variant="outline"
-                        className={STATUS_BADGE_CLASSES[issue.status]}
-                      >
-                        {STATUS_CONFIG[issue.status].label}
-                      </Badge>
-                      <Badge
-                        variant="outline"
-                        className={PRIORITY_BADGE_CLASSES[issue.priority]}
-                      >
-                        {PRIORITY_CONFIG[issue.priority].label}
-                      </Badge>
-                    </div>
-                    <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                      {/* assigneeName is null when unassigned (left join) */}
-                      {issue.assigneeName && (
-                        <UserAvatar name={issue.assigneeName} />
-                      )}
-                      {issue.assigneeName ?? "Unassigned"} ·{" "}
-                      {/* Fixed locale + format so the date looks the same everywhere */}
-                      {issue.createdAt.toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
-                    </p>
-                  </div>
+                  <span className="min-w-0 flex-1 truncate font-medium">
+                    {issue.title}
+                  </span>
+                  <span className="flex shrink-0 items-center gap-1.5 text-sm text-muted-foreground">
+                    {/* assigneeName is null when unassigned (left join) */}
+                    {issue.assigneeName && (
+                      <UserAvatar name={issue.assigneeName} />
+                    )}
+                    {issue.assigneeName ?? "Unassigned"} ·{" "}
+                    {/* Fixed locale + format so the date looks the same everywhere */}
+                    {issue.createdAt.toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
+                  </span>
                 </Card>
               </Link>
             </li>
