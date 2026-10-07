@@ -14,7 +14,7 @@ const ISSUE_COLORS = {
  * Type: display settings for one status or priority value (`{ label, color }`).
  * Shared by `STATUS_CONFIG` and `PRIORITY_CONFIG` so both maps have the same shape.
  */
-export type IssueValueConfig = { label: string; color: string };
+type IssueValueConfig = { label: string; color: string };
 
 // Status
 
