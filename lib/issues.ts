@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 import { issuePriority, issueStatus } from "@/db/schema";
 
 // Shared
@@ -77,3 +79,24 @@ export const ISSUE_KEY_PREFIX = "ISS";
 export function formatIssueKey(number: number) {
   return `${ISSUE_KEY_PREFIX}-${number}`;
 }
+
+// Form
+
+/** Validates the create/edit issue form; shared by createIssue and updateIssue. */
+export const IssueSchema = z.object({
+  title: z
+    .string({ error: "Title is required" })
+    .trim()
+    .max(180, { error: "Title is too long" })
+    .min(1, { error: "Title is required" }),
+  description: z
+    .string()
+    .trim()
+    .max(10_000, { error: "Description is too long" })
+    .transform((value) => value || undefined),
+  status: z.enum(ISSUE_STATUSES, { error: "Choose a valid status" }),
+  priority: z.enum(ISSUE_PRIORITIES, { error: "Choose a valid priority" }),
+});
+
+/** Type: parsed issue form values, as returned by `IssueSchema.parse`. */
+export type IssueInput = z.infer<typeof IssueSchema>;
