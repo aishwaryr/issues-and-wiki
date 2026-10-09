@@ -42,6 +42,7 @@ export function IssueForm() {
           maxLength={180}
           autoFocus
           placeholder="Enter title"
+          defaultValue={state.values?.title}
           aria-invalid={!!state.errors?.title}
           aria-describedby={state.errors?.title ? "title-error" : undefined}
         />
@@ -60,6 +61,7 @@ export function IssueForm() {
           rows={6}
           maxLength={10_000}
           placeholder="Describe your issue"
+          defaultValue={state.values?.description}
           aria-invalid={!!state.errors?.description}
           aria-describedby={
             state.errors?.description ? "description-error" : undefined
@@ -79,7 +81,11 @@ export function IssueForm() {
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="status">Status</Label>
-          <Select name="status" defaultValue="backlog">
+          <Select
+            key={state.values?.status}
+            name="status"
+            defaultValue={state.values?.status ?? "backlog"}
+          >
             <SelectTrigger
               id="status"
               className="w-full"
@@ -112,7 +118,11 @@ export function IssueForm() {
 
         <div className="space-y-2">
           <Label htmlFor="priority">Priority</Label>
-          <Select name="priority" defaultValue="none">
+          <Select
+            key={state.values?.priority}
+            name="priority"
+            defaultValue={state.values?.priority ?? "none"}
+          >
             <SelectTrigger
               id="priority"
               className="w-full"
