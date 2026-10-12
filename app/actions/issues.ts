@@ -35,6 +35,14 @@ export async function createIssue(
     return { errors: flattenError(result.error).fieldErrors, values };
   }
 
+  // TODO(you) issu-03: now that /issues/[id] exists, open the new issue after
+  //   create, not the list:
+  //     const [created] = await db.insert(issues).values(result.data)
+  //       .returning({ number: issues.number });
+  //     ...then below: redirect(`/issues/${created.number}`)
+  //   `created` must be declared outside the try (let), because redirect()
+  //   stays outside the try (it throws NEXT_REDIRECT).
+  //   Also update tests/e2e/create-issue.spec.ts: it expects the /issues URL.
   try {
     await db.insert(issues).values(result.data);
   } catch (error) {

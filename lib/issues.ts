@@ -80,6 +80,20 @@ export function formatIssueKey(number: number) {
   return `${ISSUE_KEY_PREFIX}-${number}`;
 }
 
+// TODO(you) 03-2a: parseIssueNumber — the reverse of formatIssueKey's input.
+//   Signature: export function parseIssueNumber(id: string): number | null
+//   Used by app/(dashboard)/issues/[id]/page.tsx (page + generateMetadata).
+//   Returns:
+//     "12"                  → 12
+//     "abc" "0" "-3" "1.5"  → null
+//     "012" "1e3" " 12"     → null   (Number() would accept these!)
+//     "2147483648" or more  → null   (above Postgres integer max 2147483647)
+//   Steps:
+//     1. Test the string with /^[1-9]\d*$/ (digits only, no leading zero).
+//     2. Only then convert with Number(id).
+//     3. Return null above 2147483647 (name it, e.g. PG_INT_MAX).
+//   Add a JSDoc one-liner like the one on formatIssueKey.
+
 // Form
 
 /** Validates the create/edit issue form; shared by createIssue and updateIssue. */
