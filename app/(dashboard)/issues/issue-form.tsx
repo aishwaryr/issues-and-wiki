@@ -3,7 +3,9 @@
 import { useActionState } from "react";
 import Link from "next/link";
 
-import { createIssue, type CreateIssueState } from "@/app/actions/issues";
+// DONE issu-04: the form no longer imports createIssue. The page passes the
+//   action in as a prop, so one form serves /issues/new AND /issues/[id]/edit.
+import type { IssueFormState } from "@/app/actions/issues";
 import { PriorityIcon, StatusIcon } from "@/components/issue-icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,13 +20,38 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { PRIORITY_OPTIONS, STATUS_OPTIONS } from "@/lib/issues";
 
-const initialState: CreateIssueState = {};
+// DONE issu-04: props make the form reusable.
+//   - action: the Server Action to submit to. A server page can pass a Server
+//     Action to a client component: React sends a reference, not the code.
+//   - initialValues: the edit page's current issue values. Empty for "new".
+//   - labels + cancelHref: the only text/links that differ between the pages.
+/** Type: props for IssueForm — which action to call, and what differs between new and edit. */
+type IssueFormProps = {
+  action: (
+    state: IssueFormState,
+    formData: FormData,
+  ) => Promise<IssueFormState>;
+  initialValues?: IssueFormState["values"];
+  submitLabel: string;
+  pendingLabel: string;
+  cancelHref: string;
+};
 
-export function IssueForm() {
-  const [state, formAction, pending] = useActionState(
-    createIssue,
-    initialState,
-  );
+/** The issue form, shared by the new and edit pages. */
+export function IssueForm({
+  action,
+  initialValues,
+  submitLabel,
+  pendingLabel,
+  cancelHref,
+}: IssueFormProps) {
+  // DONE issu-04: initialValues go in as the INITIAL state's `values`.
+  //   The inputs below already read `defaultValue={state.values?.…}` (for the
+  //   refill after a validation error), so the same code now also pre-fills
+  //   the edit form. No extra props on every input.
+  const [state, formAction, pending] = useActionState(action, {
+    values: initialValues,
+  });
 
   return (
     <form className="space-y-6" action={formAction}>
@@ -156,10 +183,10 @@ export function IssueForm() {
 
       <div className="flex justify-end gap-2">
         <Button variant="outline" asChild>
-          <Link href="/issues">Cancel</Link>
+          <Link href={cancelHref}>Cancel</Link>
         </Button>
         <Button type="submit" disabled={pending}>
-          {pending ? "Creating..." : "Create issue"}
+          {pending ? pendingLabel : submitLabel}
         </Button>
       </div>
     </form>
