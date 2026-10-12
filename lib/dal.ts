@@ -76,3 +76,28 @@ export async function listIssues() {
     .leftJoin(users, eq(issues.assigneeId, users.id))
     .orderBy(desc(issues.createdAt));
 }
+
+/** One issue by its human-readable number (ISS-12 → 12), or null if missing. */
+export async function getIssue(number: number) {
+  await requireUser();
+
+  const [issue] = await db
+    .select({
+      id: issues.id,
+      number: issues.number,
+      title: issues.title,
+      description: issues.description,
+      status: issues.status,
+      priority: issues.priority,
+      assigneeId: issues.assigneeId,
+      assigneeName: users.name,
+      createdAt: issues.createdAt,
+      updatedAt: issues.updatedAt,
+    })
+    .from(issues)
+    .leftJoin(users, eq(issues.assigneeId, users.id))
+    .where(eq(issues.number, number))
+    .limit(1);
+
+  return issue ?? null;
+}
