@@ -77,14 +77,8 @@ export async function listIssues() {
     .orderBy(desc(issues.createdAt));
 }
 
-// TODO(you) issu-03: the detail page calls getIssue twice per request (once in
-//   generateMetadata, once in the page) → 2 identical DB queries.
-//   Fix: wrap it in React cache(), like getCurrentUser above:
-//     export const getIssue = cache(async (number: number) => { ... });
-//   cache() remembers the result for the same argument during ONE server
-//   request. It is not a cross-request cache, so data is never stale.
 /** One issue by its human-readable number (ISS-12 → 12), or null if missing. */
-export async function getIssue(number: number) {
+export const getIssue = cache(async (issueNumber: number) => {
   await requireUser();
 
   const [issue] = await db
@@ -102,8 +96,8 @@ export async function getIssue(number: number) {
     })
     .from(issues)
     .leftJoin(users, eq(issues.assigneeId, users.id))
-    .where(eq(issues.number, number))
+    .where(eq(issues.number, issueNumber))
     .limit(1);
 
   return issue ?? null;
-}
+});

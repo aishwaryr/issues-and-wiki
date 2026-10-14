@@ -59,8 +59,8 @@ export default async function EditIssuePage({
   //   2. getIssue returns null → notFound(). Then delete the `!`.
   //   Tip: a bad edit URL must 404 too. Never show an empty form for an
   //   issue that doesn't exist.
-  const number = Number(id);
-  const issue = (await getIssue(number))!;
+  const issueNumber = Number(id);
+  const issue = (await getIssue(issueNumber))!;
 
   // DONE: .bind(null, issue.id) makes a NEW function with the first argument
   //   fixed. `null` is the `this` value (not used). React then calls it as

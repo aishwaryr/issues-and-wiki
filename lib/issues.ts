@@ -76,8 +76,8 @@ export const PRIORITY_OPTIONS = ISSUE_PRIORITIES.map((value) => ({
 export const ISSUE_KEY_PREFIX = "ISS";
 
 /** Formats an issue number as its key: `12` → `"ISS-12"`. */
-export function formatIssueKey(number: number) {
-  return `${ISSUE_KEY_PREFIX}-${number}`;
+export function formatIssueKey(issueNumber: number) {
+  return `${ISSUE_KEY_PREFIX}-${issueNumber}`;
 }
 
 // TODO(you) 03-2a: parseIssueNumber — the reverse of formatIssueKey's input.

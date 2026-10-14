@@ -60,20 +60,20 @@ export async function generateMetadata({
   // DONE (happy flow): Number("12") → 12.
   // TODO(you) 03-2a/b: use parseIssueNumber(id) here too (same as the page).
   //   If it returns null, call notFound(). Then a bad URL never reaches the DB.
-  const number = Number(id);
+  const issueNumber = Number(id);
 
   // DONE: getIssue runs requireUser() inside, so a signed-out visitor is
   //   redirected to /signin before any issue data loads.
-  // NOTE: the page below calls getIssue(number) again. That is a second DB
-  //   query for the same row. See the TODO above getIssue in lib/dal.ts.
+  // NOTE: the page below calls getIssue(issueNumber) again. getIssue is
+  //   wrapped in React cache(), so the second call reuses this result (1 query).
   // `!` = "TypeScript, trust me: this is not null". It is only true on the
   //   happy flow.
   // TODO(you) 03-2b: replace the `!` with a real check:
-  //     const issue = await getIssue(number);
+  //     const issue = await getIssue(issueNumber);
   //     if (!issue) notFound();
   //   After notFound() TypeScript knows `issue` is not null (notFound returns
   //   `never`), so you can delete the `!`.
-  const issue = (await getIssue(number))!;
+  const issue = (await getIssue(issueNumber))!;
 
   return { title: `${formatIssueKey(issue.number)} · ${issue.title}` };
 }
@@ -97,12 +97,12 @@ export default async function IssuePage({ params }: PageProps<"/issues/[id]">) {
   // TODO(you) 03-2b: if parseIssueNumber returns null → notFound(), BEFORE you
   //   call getIssue. Route params are untrusted user input. Reject bad input
   //   early, and don't spend a DB query on it.
-  const number = Number(id);
+  const issueNumber = Number(id);
 
   // DONE: one query. LEFT JOIN users → assigneeName (null when unassigned).
   // TODO(you) 03-2b: no row → notFound(). Same pattern as in generateMetadata,
   //   then delete the `!`.
-  const issue = (await getIssue(number))!;
+  const issue = (await getIssue(issueNumber))!;
 
   // DONE: computed once, used in the header.
   const key = formatIssueKey(issue.number);
