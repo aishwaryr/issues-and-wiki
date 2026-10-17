@@ -24,9 +24,6 @@ export default function NewIssuePage() {
       </CardHeader>
 
       <CardContent>
-        {/* DONE issu-04: IssueForm is shared now. This page passes what used
-            to be hard-coded inside it. Same text as before, so the
-            create-issue e2e spec still matches "Create issue". */}
         <IssueForm
           action={createIssue}
           submitLabel="Create issue"
