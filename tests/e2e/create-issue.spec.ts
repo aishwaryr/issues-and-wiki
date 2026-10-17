@@ -25,7 +25,9 @@ async function choose(
   await page.getByRole("option", { name: option }).click();
 }
 
-test("creates an issue and shows it in the list", async ({ page }) => {
+test("creates an issue, opens it, and shows it in the list", async ({
+  page,
+}) => {
   const title = `${TITLE_PREFIX} ${Date.now().toString(36)}`;
 
   await page.getByLabel("Title").fill(title);
@@ -34,6 +36,10 @@ test("creates an issue and shows it in the list", async ({ page }) => {
   await choose(page, "Priority", "High");
   await page.getByRole("button", { name: "Create issue" }).click();
 
+  await expect(page).toHaveURL(/\/issues\/ISS-\d+$/);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(title);
+
+  await page.getByRole("link", { name: "← All issues" }).click();
   await expectPath(page, "/issues");
   await expect(page.getByText(title)).toBeVisible();
 });

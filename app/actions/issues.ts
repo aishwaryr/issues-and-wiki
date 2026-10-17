@@ -36,15 +36,23 @@ export async function createIssue(
     return { errors: flattenError(result.error).fieldErrors, values };
   }
 
+  let created: { issueNumber: number } | undefined;
   try {
-    await db.insert(issues).values(result.data);
+    [created] = await db
+      .insert(issues)
+      .values(result.data)
+      .returning({ issueNumber: issues.number });
   } catch (error) {
     console.error("createIssue failed", error);
     return { message: "Could not create the issue. Try again.", values };
   }
 
+  if (!created) {
+    return { message: "Could not create the issue. Try again.", values };
+  }
+
   revalidatePath("/issues");
-  redirect("/issues");
+  redirect(`/issues/${formatIssueKey(created.issueNumber)}`);
 }
 
 /** Validates the edit-issue form and saves the changes. */

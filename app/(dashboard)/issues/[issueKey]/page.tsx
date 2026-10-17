@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
+import { PriorityIcon, StatusIcon } from "@/components/issue-icons";
+import { UserAvatar } from "@/components/user-avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { getIssue } from "@/lib/dal";
@@ -83,7 +85,11 @@ export default async function IssuePage({
               >
                 Description
               </h2>
-              <p>{issue.description}</p>
+              {issue.description ? (
+                <p className="whitespace-pre-wrap">{issue.description}</p>
+              ) : (
+                <p className="text-muted-foreground">No description</p>
+              )}
             </CardContent>
           </Card>
         </section>
@@ -92,13 +98,22 @@ export default async function IssuePage({
           <CardContent>
             <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-3 text-sm">
               <dt className="text-muted-foreground">Status</dt>
-              <dd>{STATUS_CONFIG[issue.status].label}</dd>
+              <dd className="flex items-center gap-2">
+                <StatusIcon status={issue.status} aria-hidden />
+                {STATUS_CONFIG[issue.status].label}
+              </dd>
 
               <dt className="text-muted-foreground">Priority</dt>
-              <dd>{PRIORITY_CONFIG[issue.priority].label}</dd>
+              <dd className="flex items-center gap-2">
+                <PriorityIcon priority={issue.priority} aria-hidden />
+                {PRIORITY_CONFIG[issue.priority].label}
+              </dd>
 
               <dt className="text-muted-foreground">Assignee</dt>
-              <dd>{issue.assigneeName ?? "Unassigned"}</dd>
+              <dd className="flex items-center gap-2">
+                {issue.assigneeName && <UserAvatar name={issue.assigneeName} />}
+                {issue.assigneeName ?? "Unassigned"}
+              </dd>
 
               <dt className="text-muted-foreground">Created</dt>
               <dd>
