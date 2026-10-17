@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
-import { deleteIssue } from "@/app/actions/issues";
+import { assignIssue, deleteIssue } from "@/app/actions/issues";
 import { PriorityIcon, StatusIcon } from "@/components/issue-icons";
 import { UserAvatar } from "@/components/user-avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { getIssue } from "@/lib/dal";
+import { getIssue, requireUser } from "@/lib/dal";
 import {
   formatIssueKey,
   parseIssueKey,
@@ -15,6 +15,7 @@ import {
   STATUS_CONFIG,
 } from "@/lib/issues";
 
+import { AssignIssueButton } from "./assign-issue-button";
 import { DeleteIssueButton } from "./delete-issue-button";
 
 export async function generateMetadata({
@@ -48,6 +49,9 @@ export default async function IssuePage({
     notFound();
   }
 
+  const user = await requireUser();
+  const assignedToMe = issue.assigneeId === user.id;
+
   return (
     <article className="space-y-6">
       <Link
@@ -60,7 +64,7 @@ export default async function IssuePage({
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0 space-y-1">
           <p className="font-mono text-sm text-muted-foreground">{issueKey}</p>
-          <h1 className="text-2xl font-semibold wrap-break-words">
+          <h1 className="text-2xl font-semibold wrap-break-word">
             {issue.title}
           </h1>
         </div>
@@ -69,9 +73,10 @@ export default async function IssuePage({
           <Button variant="outline" size="sm" asChild>
             <Link href={`/issues/${issueKey}/edit`}>Edit</Link>
           </Button>
-          <Button type="button" variant="outline" size="sm">
-            Assign to me
-          </Button>
+          <AssignIssueButton
+            assignedToMe={assignedToMe}
+            action={assignIssue.bind(null, issue.id, !assignedToMe)}
+          />
           <DeleteIssueButton action={deleteIssue.bind(null, issue.id)} />
         </div>
       </header>

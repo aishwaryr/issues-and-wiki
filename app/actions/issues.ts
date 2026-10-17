@@ -117,3 +117,27 @@ export async function deleteIssue(id: string): Promise<void> {
   revalidatePath("/");
   redirect("/issues");
 }
+
+/** Assigns an issue to the signed-in user, or unassigns it. */
+export async function assignIssue(id: string, assign: boolean): Promise<void> {
+  const user = await requireUser();
+
+  let updated: { issueNumber: number } | undefined;
+  try {
+    [updated] = await db
+      .update(issues)
+      .set({ assigneeId: assign ? user.id : null, updatedAt: new Date() })
+      .where(eq(issues.id, id))
+      .returning({ issueNumber: issues.number });
+  } catch (error) {
+    console.error("assignIssue failed", error);
+    throw new Error("Could not update the assignee. Try again.");
+  }
+
+  if (!updated) {
+    throw new Error("This issue no longer exists.");
+  }
+
+  revalidatePath("/issues");
+  revalidatePath(`/issues/${formatIssueKey(updated.issueNumber)}`);
+}
