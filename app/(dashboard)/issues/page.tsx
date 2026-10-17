@@ -55,7 +55,7 @@ export default async function IssuesPage() {
               {/* The whole card is the link: a bigger click target, and one tab stop
                   per issue. The focus ring sits on the link, since it's what gets focus. */}
               <Link
-                href={`/issues/${issue.number}`}
+                href={`/issues/${formatIssueKey(issue.number)}`}
                 className="block rounded-xl focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
               >
                 {/* One Linear-style row: priority, key, status, title, then
