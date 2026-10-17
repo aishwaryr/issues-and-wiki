@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
+import { deleteIssue } from "@/app/actions/issues";
 import { PriorityIcon, StatusIcon } from "@/components/issue-icons";
 import { UserAvatar } from "@/components/user-avatar";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,8 @@ import {
   PRIORITY_CONFIG,
   STATUS_CONFIG,
 } from "@/lib/issues";
+
+import { DeleteIssueButton } from "./delete-issue-button";
 
 export async function generateMetadata({
   params,
@@ -69,9 +72,7 @@ export default async function IssuePage({
           <Button type="button" variant="outline" size="sm">
             Assign to me
           </Button>
-          <Button type="button" variant="destructive" size="sm">
-            Delete
-          </Button>
+          <DeleteIssueButton action={deleteIssue.bind(null, issue.id)} />
         </div>
       </header>
 

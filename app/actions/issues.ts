@@ -101,3 +101,19 @@ export async function updateIssue(
 
   redirect(`/issues/${formatIssueKey(updated.issueNumber)}`);
 }
+
+/** Deletes an issue and returns to the list. */
+export async function deleteIssue(id: string): Promise<void> {
+  await requireUser();
+
+  try {
+    await db.delete(issues).where(eq(issues.id, id));
+  } catch (error) {
+    console.error("deleteIssue failed", error);
+    throw new Error("Could not delete the issue. Try again.");
+  }
+
+  revalidatePath("/issues");
+  revalidatePath("/");
+  redirect("/issues");
+}
