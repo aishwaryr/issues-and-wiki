@@ -1,6 +1,7 @@
 import { relations } from "drizzle-orm";
 import {
   index,
+  integer,
   pgEnum,
   pgTable,
   text,
@@ -9,20 +10,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 
-export const issueStatus = pgEnum("issue_status", [
-  "backlog",
-  "todo",
-  "in_progress",
-  "done",
-  "canceled",
-]);
-
-export const issuePriority = pgEnum("issue_priority", [
-  "low",
-  "medium",
-  "high",
-  "urgent",
-]);
+// Users
 
 export const users = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -37,12 +25,39 @@ export const users = pgTable("users", {
     .notNull(),
 });
 
+export const usersRelations = relations(users, ({ many }) => ({
+  assignedIssues: many(issues),
+  sessions: many(sessions),
+}));
+
+// Issues — the enums must be declared before the table that uses them
+
+export const issueStatus = pgEnum("issue_status", [
+  "backlog",
+  "todo",
+  "in_progress",
+  "done",
+  "canceled",
+]);
+
+export const issuePriority = pgEnum("issue_priority", [
+  "none",
+  "low",
+  "medium",
+  "high",
+  "urgent",
+]);
+
 export const issues = pgTable("issues", {
   id: uuid("id").defaultRandom().primaryKey(),
+  // Human-readable key (shown as ISS-12, used in URLs). The UUID stays the
+  // primary key and the target of foreign keys. Identity = Postgres assigns
+  // the next number on insert; "always" means the app can't set it.
+  number: integer("number").generatedAlwaysAsIdentity().notNull().unique(),
   title: varchar("title", { length: 180 }).notNull(),
   description: text("description"),
   status: issueStatus("status").default("backlog").notNull(),
-  priority: issuePriority("priority").default("medium").notNull(),
+  priority: issuePriority("priority").default("none").notNull(),
   assigneeId: uuid("assignee_id").references(() => users.id, {
     onDelete: "set null",
   }),
@@ -53,6 +68,15 @@ export const issues = pgTable("issues", {
     .defaultNow()
     .notNull(),
 });
+
+export const issuesRelations = relations(issues, ({ one }) => ({
+  assignee: one(users, {
+    fields: [issues.assigneeId],
+    references: [users.id],
+  }),
+}));
+
+// Sessions
 
 export const sessions = pgTable(
   "sessions",
@@ -69,21 +93,9 @@ export const sessions = pgTable(
   (table) => [index("sessions_user_id_idx").on(table.userId)],
 );
 
-export const usersRelations = relations(users, ({ many }) => ({
-  assignedIssues: many(issues),
-  sessions: many(sessions),
-}));
-
 export const sessionsRelations = relations(sessions, ({ one }) => ({
   user: one(users, {
     fields: [sessions.userId],
-    references: [users.id],
-  }),
-}));
-
-export const issuesRelations = relations(issues, ({ one }) => ({
-  assignee: one(users, {
-    fields: [issues.assigneeId],
     references: [users.id],
   }),
 }));

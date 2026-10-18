@@ -22,6 +22,27 @@
       "when": 1789623263115,
       "tag": "0002_awesome_karen_page",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1790849191797,
+      "tag": "0003_uneven_vapor",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1790868165011,
+      "tag": "0004_gifted_shape",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1790869307890,
+      "tag": "0005_brave_medusa",
+      "breakpoints": true
     }
   ]
 }

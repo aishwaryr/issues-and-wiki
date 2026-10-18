@@ -2,11 +2,14 @@ import "server-only";
 
 import { cache } from "react";
 import { redirect } from "next/navigation";
-import { eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 
 import { db } from "@/db";
-import { users } from "@/db/schema";
+import { issues, users } from "@/db/schema";
+import type { IssueFiltersInput } from "@/lib/issues";
 import { getSession } from "@/lib/session";
+
+// Users
 
 export type CurrentUser = {
   id: string;
@@ -53,3 +56,56 @@ export async function requireUser(): Promise<CurrentUser> {
   }
   return user;
 }
+
+// Issues
+
+/** All issues, newest first, filtered by status and priority when given. */
+export async function listIssues(filters: IssueFiltersInput = {}) {
+  await requireUser();
+
+  // LEFT join keeps unassigned issues (assigneeName is null); one query, no N+1.
+  return db
+    .select({
+      id: issues.id,
+      number: issues.number,
+      title: issues.title,
+      status: issues.status,
+      priority: issues.priority,
+      createdAt: issues.createdAt,
+      assigneeName: users.name,
+    })
+    .from(issues)
+    .leftJoin(users, eq(issues.assigneeId, users.id))
+    .where(
+      and(
+        filters.status ? eq(issues.status, filters.status) : undefined,
+        filters.priority ? eq(issues.priority, filters.priority) : undefined,
+      ),
+    )
+    .orderBy(desc(issues.createdAt));
+}
+
+/** One issue by its human-readable number (ISS-12 → 12), or null if missing. */
+export const getIssue = cache(async (issueNumber: number) => {
+  await requireUser();
+
+  const [issue] = await db
+    .select({
+      id: issues.id,
+      number: issues.number,
+      title: issues.title,
+      description: issues.description,
+      status: issues.status,
+      priority: issues.priority,
+      assigneeId: issues.assigneeId,
+      assigneeName: users.name,
+      createdAt: issues.createdAt,
+      updatedAt: issues.updatedAt,
+    })
+    .from(issues)
+    .leftJoin(users, eq(issues.assigneeId, users.id))
+    .where(eq(issues.number, issueNumber))
+    .limit(1);
+
+  return issue ?? null;
+});

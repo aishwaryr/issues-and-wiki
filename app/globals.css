@@ -5,6 +5,9 @@
   --foreground: #171717;
   --card: #ffffff;
   --card-foreground: #171717;
+  /* Pop-up surfaces (select menus, popovers). Same as card. */
+  --popover: #ffffff;
+  --popover-foreground: #171717;
   --primary: #171717;
   --primary-foreground: #fafafa;
   --secondary: #f5f5f5;
@@ -24,6 +27,8 @@
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
@@ -46,6 +51,8 @@
     --foreground: #ededed;
     --card: #171717;
     --card-foreground: #fafafa;
+    --popover: #171717;
+    --popover-foreground: #fafafa;
     --primary: #fafafa;
     --primary-foreground: #171717;
     --secondary: #262626;

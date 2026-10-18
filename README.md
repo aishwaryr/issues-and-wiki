@@ -6,11 +6,12 @@ A project for work tracking and shared documentation, following selected lessons
 
 - Email/password auth: sign-up, sign-in and sign-out, with database-backed sessions
 - Signed-in pages are protected; the dashboard at `/` is a placeholder
-- Issues and wiki modules are next
+- Issues: create, list, filter by status and priority, view, edit, assign to yourself, delete. Each issue has a readable key and URL (`/issues/ISS-12`)
+- The wiki module is next
 
 ## Stack
 
-Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4, shadcn/ui, Drizzle ORM, Neon Postgres, zod, Cypress.
+Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4, shadcn/ui, Drizzle ORM, Neon Postgres, zod, Playwright.
 
 ## Run locally
 
@@ -29,8 +30,10 @@ Open http://localhost:3000. Node 24 is pinned in `.nvmrc`.
 
 ```bash
 npm run lint
-npm run cy:run   # all end-to-end tests; needs the dev server running
-npx cypress run --spec cypress/e2e/signin.cy.ts   # one feature
+npm run pw:run   # all end-to-end tests (Playwright)
+npx playwright test tests/e2e/signin.spec.ts   # one feature
 ```
 
-Specs live in `cypress/e2e/`, one per feature. Sign-in, logout and guard specs use the accounts in `cypress/fixtures/users.json`, which they seed themselves.
+Specs live in `tests/e2e/`, one per feature. Playwright reuses the dev server on :3000 if it is running and starts one otherwise. It runs in the locally installed Google Chrome. Sign-in, logout and guard specs use the accounts in `cypress/fixtures/users.json`, which `tests/e2e/global-setup.ts` seeds before each run.
+
+The older Cypress suite in `cypress/e2e/` is kept for reference but is no longer maintained; new specs go in Playwright.
