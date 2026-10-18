@@ -2,7 +2,7 @@ import { loadEnvConfig } from "@next/env";
 import { neon } from "@neondatabase/serverless";
 import bcrypt from "bcryptjs";
 
-import testUsers from "../../cypress/fixtures/users.json";
+import testUsers from "./fixtures/users.json";
 
 // Upserts the fixture accounts once per run, so sign-in specs never sign up first.
 // Cost 4 keeps it fast; bcrypt.compare reads the cost from the hash.
