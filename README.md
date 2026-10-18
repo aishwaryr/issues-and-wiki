@@ -34,4 +34,4 @@ npm run pw:run   # all end-to-end tests (Playwright)
 npx playwright test tests/e2e/signin.spec.ts   # one feature
 ```
 
-Specs live in `tests/e2e/`, one per feature. Playwright reuses the dev server on :3000 if it is running and starts one otherwise. It runs in the locally installed Google Chrome. Sign-in, logout and guard specs use the accounts in `tests/e2e/fixtures/users.json`, which `tests/e2e/global-setup.ts` seeds before each run.
+Specs live in `tests/e2e/`, one per feature. Playwright builds the app and runs it with `next start` on :3100 for each run, so the dev server on :3000 can keep running. The HTML report opens with `npx playwright show-report`. It runs in the locally installed Google Chrome. Sign-in, logout and guard specs use the accounts in `tests/e2e/fixtures/users.json`, which `tests/e2e/global-setup.ts` seeds before each run.
