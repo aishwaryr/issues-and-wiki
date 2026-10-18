@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { and, desc, eq } from "drizzle-orm";
 
 import { db } from "@/db";
-import { issues, users } from "@/db/schema";
+import { issues, users, wikiPages } from "@/db/schema";
 import type { IssueFiltersInput } from "@/lib/issues";
 import { getSession } from "@/lib/session";
 
@@ -108,4 +108,46 @@ export const getIssue = cache(async (issueNumber: number) => {
     .limit(1);
 
   return issue ?? null;
+});
+
+// Wiki pages
+
+/** All wiki pages, most recently updated first, with the author's name. */
+export async function listWikiPages() {
+  await requireUser();
+
+  // LEFT join keeps pages whose author was deleted (authorName is null).
+  return db
+    .select({
+      id: wikiPages.id,
+      title: wikiPages.title,
+      slug: wikiPages.slug,
+      authorName: users.name,
+      updatedAt: wikiPages.updatedAt,
+    })
+    .from(wikiPages)
+    .leftJoin(users, eq(wikiPages.authorId, users.id))
+    .orderBy(desc(wikiPages.updatedAt));
+}
+
+/** One wiki page by its slug, or null if missing. Cached per request (page + metadata). */
+export const getWikiPage = cache(async (slug: string) => {
+  await requireUser();
+
+  const [page] = await db
+    .select({
+      id: wikiPages.id,
+      title: wikiPages.title,
+      slug: wikiPages.slug,
+      body: wikiPages.body,
+      authorName: users.name,
+      createdAt: wikiPages.createdAt,
+      updatedAt: wikiPages.updatedAt,
+    })
+    .from(wikiPages)
+    .leftJoin(users, eq(wikiPages.authorId, users.id))
+    .where(eq(wikiPages.slug, slug))
+    .limit(1);
+
+  return page ?? null;
 });
