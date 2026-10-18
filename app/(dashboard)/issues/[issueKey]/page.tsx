@@ -1,13 +1,24 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { FileText, X } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
 
-import { assignIssue, deleteIssue } from "@/app/actions/issues";
+import {
+  assignIssue,
+  deleteIssue,
+  linkWikiPage,
+  unlinkWikiPage,
+} from "@/app/actions/issues";
 import { PriorityIcon, StatusIcon } from "@/components/issue-icons";
 import { UserAvatar } from "@/components/user-avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { getIssue, requireUser } from "@/lib/dal";
+import {
+  getIssue,
+  listLinkedWikiPages,
+  listWikiPages,
+  requireUser,
+} from "@/lib/dal";
 import {
   formatIssueKey,
   parseIssueKey,
@@ -17,6 +28,7 @@ import {
 
 import { AssignIssueButton } from "./assign-issue-button";
 import { DeleteIssueButton } from "./delete-issue-button";
+import { LinkWikiPageForm } from "./link-wiki-page-form";
 
 export async function generateMetadata({
   params,
@@ -49,8 +61,14 @@ export default async function IssuePage({
     notFound();
   }
 
-  const user = await requireUser();
+  const [user, linkedPages, allPages] = await Promise.all([
+    requireUser(),
+    listLinkedWikiPages(issue.id),
+    listWikiPages(),
+  ]);
   const assignedToMe = issue.assigneeId === user.id;
+  const linkedIds = new Set(linkedPages.map((page) => page.id));
+  const linkablePages = allPages.filter((page) => !linkedIds.has(page.id));
 
   return (
     <article className="space-y-6">
@@ -82,23 +100,92 @@ export default async function IssuePage({
       </header>
 
       <div className="grid items-start gap-6 md:grid-cols-[1fr_18rem]">
-        <section aria-labelledby="description-heading">
-          <Card>
-            <CardContent className="space-y-3">
-              <h2
-                id="description-heading"
-                className="text-sm font-medium text-muted-foreground"
-              >
-                Description
-              </h2>
-              {issue.description ? (
-                <p className="whitespace-pre-wrap">{issue.description}</p>
-              ) : (
-                <p className="text-muted-foreground">No description</p>
-              )}
-            </CardContent>
-          </Card>
-        </section>
+        <div className="space-y-6">
+          <section aria-labelledby="description-heading">
+            <Card>
+              <CardContent className="space-y-3">
+                <h2
+                  id="description-heading"
+                  className="text-sm font-medium text-muted-foreground"
+                >
+                  Description
+                </h2>
+                {issue.description ? (
+                  <p className="whitespace-pre-wrap">{issue.description}</p>
+                ) : (
+                  <p className="text-muted-foreground">No description</p>
+                )}
+              </CardContent>
+            </Card>
+          </section>
+
+          <section aria-labelledby="wiki-pages-heading">
+            <Card>
+              <CardContent className="space-y-4">
+                <h2
+                  id="wiki-pages-heading"
+                  className="text-sm font-medium text-muted-foreground"
+                >
+                  Wiki pages
+                </h2>
+
+                {linkedPages.length === 0 ? (
+                  <p className="text-muted-foreground">No linked pages</p>
+                ) : (
+                  <ul className="space-y-1">
+                    {linkedPages.map((page) => (
+                      <li
+                        key={page.id}
+                        className="flex items-center justify-between gap-2"
+                      >
+                        <Link
+                          href={`/wiki/${page.slug}`}
+                          className="flex min-w-0 items-center gap-2 hover:underline"
+                        >
+                          <FileText
+                            aria-hidden
+                            className="size-4 shrink-0 text-muted-foreground"
+                          />
+                          <span className="truncate">{page.title}</span>
+                        </Link>
+                        <form
+                          action={unlinkWikiPage.bind(null, issue.id, page.id)}
+                        >
+                          <Button
+                            type="submit"
+                            variant="ghost"
+                            size="icon"
+                            aria-label={`Unlink ${page.title}`}
+                          >
+                            <X />
+                          </Button>
+                        </form>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
+                {allPages.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">
+                    No wiki pages yet.{" "}
+                    <Link href="/wiki/new" className="underline">
+                      Write one
+                    </Link>
+                  </p>
+                ) : (
+                  linkablePages.length > 0 && (
+                    <LinkWikiPageForm
+                      // Remount after each link so the picker resets to empty.
+                      key={linkedPages.length}
+                      pages={linkablePages}
+                      action={linkWikiPage.bind(null, issue.id)}
+                    />
+                  )
+                )}
+              </CardContent>
+            </Card>
+          </section>
+        </div>
 
         <Card>
           <CardContent>

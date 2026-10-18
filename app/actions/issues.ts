@@ -2,11 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { eq } from "drizzle-orm";
-import { flattenError } from "zod";
+import { and, eq } from "drizzle-orm";
+import { flattenError, z } from "zod";
 
 import { db } from "@/db";
-import { issues } from "@/db/schema";
+import { issueWikiLinks, issues } from "@/db/schema";
 import { requireUser } from "@/lib/dal";
 import { readForm } from "@/lib/form-data";
 import { formatIssueKey, IssueSchema, type IssueInput } from "@/lib/issues";
@@ -140,4 +140,63 @@ export async function assignIssue(id: string, assign: boolean): Promise<void> {
 
   revalidatePath("/issues");
   revalidatePath(`/issues/${formatIssueKey(updated.issueNumber)}`);
+}
+
+// Wiki page links
+
+const WikiPageIdSchema = z.uuid();
+
+/** Links the wiki page picked in the form to an issue. Linking twice is a no-op. */
+export async function linkWikiPage(
+  issueId: string,
+  formData: FormData,
+): Promise<void> {
+  await requireUser();
+
+  const result = WikiPageIdSchema.safeParse(formData.get("wikiPageId"));
+  if (!result.success) {
+    throw new Error("Choose a wiki page to link.");
+  }
+
+  try {
+    await db
+      .insert(issueWikiLinks)
+      .values({ issueId, wikiPageId: result.data })
+      .onConflictDoNothing({
+        target: [issueWikiLinks.issueId, issueWikiLinks.wikiPageId],
+      });
+  } catch (error) {
+    // A foreign key error lands here too: the issue or page was just deleted.
+    console.error("linkWikiPage failed", error);
+    throw new Error("Could not link the page. Try again.");
+  }
+
+  // Both ends show the link; "page" revalidates every URL of the dynamic route.
+  revalidatePath("/issues/[issueKey]", "page");
+  revalidatePath("/wiki/[slug]", "page");
+}
+
+/** Removes the link between an issue and a wiki page. */
+export async function unlinkWikiPage(
+  issueId: string,
+  wikiPageId: string,
+): Promise<void> {
+  await requireUser();
+
+  try {
+    await db
+      .delete(issueWikiLinks)
+      .where(
+        and(
+          eq(issueWikiLinks.issueId, issueId),
+          eq(issueWikiLinks.wikiPageId, wikiPageId),
+        ),
+      );
+  } catch (error) {
+    console.error("unlinkWikiPage failed", error);
+    throw new Error("Could not unlink the page. Try again.");
+  }
+
+  revalidatePath("/issues/[issueKey]", "page");
+  revalidatePath("/wiki/[slug]", "page");
 }

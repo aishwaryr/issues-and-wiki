@@ -50,6 +50,13 @@
       "when": 1792330271372,
       "tag": "0006_good_cerise",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1792332177449,
+      "tag": "0007_confused_lockheed",
+      "breakpoints": true
     }
   ]
 }

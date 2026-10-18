@@ -2,10 +2,10 @@ import "server-only";
 
 import { cache } from "react";
 import { redirect } from "next/navigation";
-import { and, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 
 import { db } from "@/db";
-import { issues, users, wikiPages } from "@/db/schema";
+import { issueWikiLinks, issues, users, wikiPages } from "@/db/schema";
 import type { IssueFiltersInput } from "@/lib/issues";
 import { getSession } from "@/lib/session";
 
@@ -151,3 +151,34 @@ export const getWikiPage = cache(async (slug: string) => {
 
   return page ?? null;
 });
+
+// Issue ↔ wiki page links
+
+/** Wiki pages linked to an issue, by title. */
+export async function listLinkedWikiPages(issueId: string) {
+  await requireUser();
+
+  return db
+    .select({ id: wikiPages.id, title: wikiPages.title, slug: wikiPages.slug })
+    .from(issueWikiLinks)
+    .innerJoin(wikiPages, eq(issueWikiLinks.wikiPageId, wikiPages.id))
+    .where(eq(issueWikiLinks.issueId, issueId))
+    .orderBy(asc(wikiPages.title));
+}
+
+/** Issues linked to a wiki page, newest first. */
+export async function listLinkedIssues(wikiPageId: string) {
+  await requireUser();
+
+  return db
+    .select({
+      id: issues.id,
+      number: issues.number,
+      title: issues.title,
+      status: issues.status,
+    })
+    .from(issueWikiLinks)
+    .innerJoin(issues, eq(issueWikiLinks.issueId, issues.id))
+    .where(eq(issueWikiLinks.wikiPageId, wikiPageId))
+    .orderBy(desc(issues.createdAt));
+}
