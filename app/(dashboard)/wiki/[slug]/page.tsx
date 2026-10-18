@@ -2,12 +2,15 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { deleteWikiPage } from "@/app/actions/wiki";
 import { Markdown } from "@/components/markdown";
 import { UserAvatar } from "@/components/user-avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { getWikiPage } from "@/lib/dal";
 import { formatDate } from "@/lib/dates";
+
+import { DeleteWikiPageButton } from "./delete-wiki-page-button";
 
 export async function generateMetadata({
   params,
@@ -57,10 +60,7 @@ export default async function WikiPageDetail({
           <Button variant="outline" size="sm" asChild>
             <Link href={`/wiki/${page.slug}/edit`}>Edit</Link>
           </Button>
-          {/* Wired to deleteWikiPage in wiki-06. */}
-          <Button variant="destructive" size="sm" disabled>
-            Delete
-          </Button>
+          <DeleteWikiPageButton action={deleteWikiPage.bind(null, page.id)} />
         </div>
       </header>
 

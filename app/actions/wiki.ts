@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { eq } from "drizzle-orm";
 import { flattenError } from "zod";
 
 import { db } from "@/db";
@@ -75,4 +76,58 @@ export async function createWikiPage(
 
   revalidatePath("/wiki");
   redirect(`/wiki/${created.slug}`);
+}
+
+// Update
+
+/** Validates the edit-page form and saves it. The slug stays the same, so links keep working. */
+export async function updateWikiPage(
+  id: string,
+  _prevState: WikiPageFormState,
+  formData: FormData,
+): Promise<WikiPageFormState> {
+  await requireUser();
+
+  const values = readForm(formData, WIKI_PAGE_FIELDS);
+  const result = WikiPageSchema.safeParse(values);
+  if (!result.success) {
+    return { errors: flattenError(result.error).fieldErrors, values };
+  }
+
+  let updated: { slug: string } | undefined;
+  try {
+    [updated] = await db
+      .update(wikiPages)
+      .set({ ...result.data, updatedAt: new Date() })
+      .where(eq(wikiPages.id, id))
+      .returning({ slug: wikiPages.slug });
+  } catch (error) {
+    console.error("updateWikiPage failed", error);
+    return { message: "Could not save the page. Try again.", values };
+  }
+
+  if (!updated) {
+    return { message: "This page no longer exists.", values };
+  }
+
+  revalidatePath("/wiki");
+  revalidatePath(`/wiki/${updated.slug}`);
+  redirect(`/wiki/${updated.slug}`);
+}
+
+// Delete
+
+/** Deletes a wiki page and returns to the list. */
+export async function deleteWikiPage(id: string): Promise<void> {
+  await requireUser();
+
+  try {
+    await db.delete(wikiPages).where(eq(wikiPages.id, id));
+  } catch (error) {
+    console.error("deleteWikiPage failed", error);
+    throw new Error("Could not delete the page. Try again.");
+  }
+
+  revalidatePath("/wiki");
+  redirect("/wiki");
 }
