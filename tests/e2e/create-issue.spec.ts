@@ -1,7 +1,7 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 import { alice, expectPath, signIn } from "./support/auth";
-import { sql } from "./support/db";
+import { choose, deleteIssues } from "./support/issues";
 
 // Every issue this spec creates starts with this, so cleanup can't touch real data.
 const TITLE_PREFIX = "E2E issue";
@@ -13,17 +13,8 @@ test.beforeEach(async ({ page }) => {
 });
 
 test.afterAll(async () => {
-  await sql`delete from issues where title like ${`${TITLE_PREFIX}%`}`;
+  await deleteIssues(TITLE_PREFIX);
 });
-
-async function choose(
-  page: Page,
-  field: "Status" | "Priority",
-  option: string,
-) {
-  await page.getByLabel(field).click();
-  await page.getByRole("option", { name: option }).click();
-}
 
 test("creates an issue, opens it, and shows it in the list", async ({
   page,
