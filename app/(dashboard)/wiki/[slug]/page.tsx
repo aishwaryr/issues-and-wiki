@@ -3,12 +3,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { deleteWikiPage } from "@/app/actions/wiki";
+import { StatusIcon } from "@/components/issue-icons";
 import { Markdown } from "@/components/markdown";
 import { UserAvatar } from "@/components/user-avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { getWikiPage } from "@/lib/dal";
+import { getWikiPage, listLinkedIssues } from "@/lib/dal";
 import { formatDate } from "@/lib/dates";
+import { formatIssueKey } from "@/lib/issues";
 
 import { DeleteWikiPageButton } from "./delete-wiki-page-button";
 
@@ -32,6 +34,7 @@ export default async function WikiPageDetail({
   if (page === null) {
     notFound();
   }
+  const linkedIssues = await listLinkedIssues(page.id);
 
   return (
     <article className="space-y-6">
@@ -73,6 +76,41 @@ export default async function WikiPageDetail({
           )}
         </CardContent>
       </Card>
+
+      <section aria-labelledby="linked-issues-heading">
+        <Card>
+          <CardContent className="space-y-3">
+            <h2
+              id="linked-issues-heading"
+              className="text-sm font-medium text-muted-foreground"
+            >
+              Linked issues
+            </h2>
+            {linkedIssues.length === 0 ? (
+              <p className="text-muted-foreground">
+                No linked issues. Link this page from an issue.
+              </p>
+            ) : (
+              <ul className="space-y-1">
+                {linkedIssues.map((issue) => (
+                  <li key={issue.id}>
+                    <Link
+                      href={`/issues/${formatIssueKey(issue.number)}`}
+                      className="flex min-w-0 items-center gap-2 hover:underline"
+                    >
+                      <StatusIcon status={issue.status} />
+                      <span className="shrink-0 font-mono text-xs text-muted-foreground">
+                        {formatIssueKey(issue.number)}
+                      </span>
+                      <span className="truncate">{issue.title}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+      </section>
     </article>
   );
 }

@@ -4,6 +4,7 @@ import {
   integer,
   pgEnum,
   pgTable,
+  primaryKey,
   text,
   timestamp,
   uuid,
@@ -70,11 +71,12 @@ export const issues = pgTable("issues", {
     .notNull(),
 });
 
-export const issuesRelations = relations(issues, ({ one }) => ({
+export const issuesRelations = relations(issues, ({ one, many }) => ({
   assignee: one(users, {
     fields: [issues.assigneeId],
     references: [users.id],
   }),
+  wikiLinks: many(issueWikiLinks),
 }));
 
 // Sessions
@@ -122,9 +124,45 @@ export const wikiPages = pgTable("wiki_pages", {
     .notNull(),
 });
 
-export const wikiPagesRelations = relations(wikiPages, ({ one }) => ({
+export const wikiPagesRelations = relations(wikiPages, ({ one, many }) => ({
   author: one(users, {
     fields: [wikiPages.authorId],
     references: [users.id],
+  }),
+  issueLinks: many(issueWikiLinks),
+}));
+
+// Issue ↔ wiki page links (many-to-many)
+
+export const issueWikiLinks = pgTable(
+  "issue_wiki_links",
+  {
+    // Cascade on both sides: a link means nothing once either end is deleted.
+    issueId: uuid("issue_id")
+      .notNull()
+      .references(() => issues.id, { onDelete: "cascade" }),
+    wikiPageId: uuid("wiki_page_id")
+      .notNull()
+      .references(() => wikiPages.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    // The pair is the key, so the same link can't exist twice. Its index also
+    // serves "pages for an issue"; the second index serves "issues for a page".
+    primaryKey({ columns: [table.issueId, table.wikiPageId] }),
+    index("issue_wiki_links_wiki_page_id_idx").on(table.wikiPageId),
+  ],
+);
+
+export const issueWikiLinksRelations = relations(issueWikiLinks, ({ one }) => ({
+  issue: one(issues, {
+    fields: [issueWikiLinks.issueId],
+    references: [issues.id],
+  }),
+  wikiPage: one(wikiPages, {
+    fields: [issueWikiLinks.wikiPageId],
+    references: [wikiPages.id],
   }),
 }));
