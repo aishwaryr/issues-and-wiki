@@ -113,3 +113,14 @@ export const IssueSchema = z.object({
 
 /** Type: parsed issue form values, as returned by `IssueSchema.parse`. */
 export type IssueInput = z.infer<typeof IssueSchema>;
+
+// Filters
+
+/** Validates the list filters from the URL; an invalid or missing value becomes undefined. */
+export const IssueFiltersSchema = z.object({
+  status: z.enum(ISSUE_STATUSES).optional().catch(undefined),
+  priority: z.enum(ISSUE_PRIORITIES).optional().catch(undefined),
+});
+
+/** Type: parsed list filters (`{ status?, priority? }`). */
+export type IssueFiltersInput = z.infer<typeof IssueFiltersSchema>;

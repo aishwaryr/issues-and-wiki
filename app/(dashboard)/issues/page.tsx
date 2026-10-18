@@ -9,12 +9,17 @@ import { UserAvatar } from "@/components/user-avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { listIssues } from "@/lib/dal";
-import { formatIssueKey } from "@/lib/issues";
+import { formatIssueKey, IssueFiltersSchema } from "@/lib/issues";
 
 export const metadata: Metadata = { title: "Issues" };
 
-export default async function IssuesPage() {
-  const issues = await listIssues();
+export default async function IssuesPage({
+  searchParams,
+}: PageProps<"/issues">) {
+  const filters = IssueFiltersSchema.parse(await searchParams);
+  const hasFilters =
+    filters.status !== undefined || filters.priority !== undefined;
+  const issues = await listIssues(filters);
 
   const newIssueButton = (
     <Button asChild>
@@ -42,7 +47,17 @@ export default async function IssuesPage() {
       <IssueFilters />
 
       {/* list */}
-      {issues.length === 0 ? (
+      {issues.length === 0 && hasFilters ? (
+        <EmptyState
+          title="No issues match these filters"
+          description="Try another status or priority."
+          action={
+            <Button variant="outline" asChild>
+              <Link href="/issues">Reset filters</Link>
+            </Button>
+          }
+        />
+      ) : issues.length === 0 ? (
         <EmptyState
           title="No issues yet"
           description="Create the first one to start tracking work."

@@ -2,10 +2,11 @@ import "server-only";
 
 import { cache } from "react";
 import { redirect } from "next/navigation";
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 
 import { db } from "@/db";
 import { issues, users } from "@/db/schema";
+import type { IssueFiltersInput } from "@/lib/issues";
 import { getSession } from "@/lib/session";
 
 // Users
@@ -58,7 +59,8 @@ export async function requireUser(): Promise<CurrentUser> {
 
 // Issues
 
-export async function listIssues() {
+/** All issues, newest first, filtered by status and priority when given. */
+export async function listIssues(filters: IssueFiltersInput = {}) {
   await requireUser();
 
   // LEFT join keeps unassigned issues (assigneeName is null); one query, no N+1.
@@ -74,6 +76,12 @@ export async function listIssues() {
     })
     .from(issues)
     .leftJoin(users, eq(issues.assigneeId, users.id))
+    .where(
+      and(
+        filters.status ? eq(issues.status, filters.status) : undefined,
+        filters.priority ? eq(issues.priority, filters.priority) : undefined,
+      ),
+    )
     .orderBy(desc(issues.createdAt));
 }
 
