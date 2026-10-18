@@ -6,7 +6,8 @@ A project for work tracking and shared documentation, following selected lessons
 
 - Email/password auth: sign-up, sign-in and sign-out, with database-backed sessions
 - Signed-in pages are protected; the dashboard at `/` is a placeholder
-- Issues and wiki modules are next
+- Issues: create, list, filter by status and priority, view, edit, assign to yourself, delete. Each issue has a readable key and URL (`/issues/ISS-12`)
+- The wiki module is next
 
 ## Stack
 
