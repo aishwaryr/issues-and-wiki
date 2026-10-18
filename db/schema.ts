@@ -28,6 +28,7 @@ export const users = pgTable("users", {
 export const usersRelations = relations(users, ({ many }) => ({
   assignedIssues: many(issues),
   sessions: many(sessions),
+  wikiPages: many(wikiPages),
 }));
 
 // Issues — the enums must be declared before the table that uses them
@@ -96,6 +97,34 @@ export const sessions = pgTable(
 export const sessionsRelations = relations(sessions, ({ one }) => ({
   user: one(users, {
     fields: [sessions.userId],
+    references: [users.id],
+  }),
+}));
+
+// Wiki pages
+
+export const wikiPages = pgTable("wiki_pages", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  title: varchar("title", { length: 180 }).notNull(),
+  // URL key (/wiki/getting-started). Unique, so two pages can't share a URL.
+  slug: varchar("slug", { length: 200 }).notNull().unique(),
+  // Markdown source. Empty string, not null, for a page with no body yet.
+  body: text("body").default("").notNull(),
+  // Set null, not cascade: deleting a user keeps the pages they wrote.
+  authorId: uuid("author_id").references(() => users.id, {
+    onDelete: "set null",
+  }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export const wikiPagesRelations = relations(wikiPages, ({ one }) => ({
+  author: one(users, {
+    fields: [wikiPages.authorId],
     references: [users.id],
   }),
 }));
