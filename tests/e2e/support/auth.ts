@@ -1,6 +1,6 @@
 import { expect, type Page } from "@playwright/test";
 
-import users from "../../../cypress/fixtures/users.json";
+import users from "../fixtures/users.json";
 
 export type TestUser = { name: string; email: string; password: string };
 
