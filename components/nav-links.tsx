@@ -7,7 +7,6 @@ import { cn } from "cn";
 const links = [
   { href: "/", label: "Dashboard" },
   { href: "/issues", label: "Issues" },
-  { href: "/wiki", label: "Wiki" },
 ];
 
 function isActive(pathname: string, href: string) {

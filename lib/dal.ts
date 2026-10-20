@@ -2,11 +2,10 @@ import "server-only";
 
 import { cache } from "react";
 import { redirect } from "next/navigation";
-import { and, asc, desc, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 import { db } from "@/db";
-import { issueWikiLinks, issues, users, wikiPages } from "@/db/schema";
-import type { IssueFiltersInput } from "@/lib/issues";
+import { users } from "@/db/schema";
 import { getSession } from "@/lib/session";
 
 // Users
@@ -55,130 +54,4 @@ export async function requireUser(): Promise<CurrentUser> {
     redirect("/signin");
   }
   return user;
-}
-
-// Issues
-
-/** All issues, newest first, filtered by status and priority when given. */
-export async function listIssues(filters: IssueFiltersInput = {}) {
-  await requireUser();
-
-  // LEFT join keeps unassigned issues (assigneeName is null); one query, no N+1.
-  return db
-    .select({
-      id: issues.id,
-      number: issues.number,
-      title: issues.title,
-      status: issues.status,
-      priority: issues.priority,
-      createdAt: issues.createdAt,
-      assigneeName: users.name,
-    })
-    .from(issues)
-    .leftJoin(users, eq(issues.assigneeId, users.id))
-    .where(
-      and(
-        filters.status ? eq(issues.status, filters.status) : undefined,
-        filters.priority ? eq(issues.priority, filters.priority) : undefined,
-      ),
-    )
-    .orderBy(desc(issues.createdAt));
-}
-
-/** One issue by its human-readable number (ISS-12 → 12), or null if missing. */
-export const getIssue = cache(async (issueNumber: number) => {
-  await requireUser();
-
-  const [issue] = await db
-    .select({
-      id: issues.id,
-      number: issues.number,
-      title: issues.title,
-      description: issues.description,
-      status: issues.status,
-      priority: issues.priority,
-      assigneeId: issues.assigneeId,
-      assigneeName: users.name,
-      createdAt: issues.createdAt,
-      updatedAt: issues.updatedAt,
-    })
-    .from(issues)
-    .leftJoin(users, eq(issues.assigneeId, users.id))
-    .where(eq(issues.number, issueNumber))
-    .limit(1);
-
-  return issue ?? null;
-});
-
-// Wiki pages
-
-/** All wiki pages, most recently updated first, with the author's name. */
-export async function listWikiPages() {
-  await requireUser();
-
-  // LEFT join keeps pages whose author was deleted (authorName is null).
-  return db
-    .select({
-      id: wikiPages.id,
-      title: wikiPages.title,
-      slug: wikiPages.slug,
-      authorName: users.name,
-      updatedAt: wikiPages.updatedAt,
-    })
-    .from(wikiPages)
-    .leftJoin(users, eq(wikiPages.authorId, users.id))
-    .orderBy(desc(wikiPages.updatedAt));
-}
-
-/** One wiki page by its slug, or null if missing. Cached per request (page + metadata). */
-export const getWikiPage = cache(async (slug: string) => {
-  await requireUser();
-
-  const [page] = await db
-    .select({
-      id: wikiPages.id,
-      title: wikiPages.title,
-      slug: wikiPages.slug,
-      body: wikiPages.body,
-      authorName: users.name,
-      createdAt: wikiPages.createdAt,
-      updatedAt: wikiPages.updatedAt,
-    })
-    .from(wikiPages)
-    .leftJoin(users, eq(wikiPages.authorId, users.id))
-    .where(eq(wikiPages.slug, slug))
-    .limit(1);
-
-  return page ?? null;
-});
-
-// Issue ↔ wiki page links
-
-/** Wiki pages linked to an issue, by title. */
-export async function listLinkedWikiPages(issueId: string) {
-  await requireUser();
-
-  return db
-    .select({ id: wikiPages.id, title: wikiPages.title, slug: wikiPages.slug })
-    .from(issueWikiLinks)
-    .innerJoin(wikiPages, eq(issueWikiLinks.wikiPageId, wikiPages.id))
-    .where(eq(issueWikiLinks.issueId, issueId))
-    .orderBy(asc(wikiPages.title));
-}
-
-/** Issues linked to a wiki page, newest first. */
-export async function listLinkedIssues(wikiPageId: string) {
-  await requireUser();
-
-  return db
-    .select({
-      id: issues.id,
-      number: issues.number,
-      title: issues.title,
-      status: issues.status,
-    })
-    .from(issueWikiLinks)
-    .innerJoin(issues, eq(issueWikiLinks.issueId, issues.id))
-    .where(eq(issueWikiLinks.wikiPageId, wikiPageId))
-    .orderBy(desc(issues.createdAt));
 }
