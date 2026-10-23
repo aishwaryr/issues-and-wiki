@@ -2,10 +2,10 @@ import "server-only";
 
 import { cache } from "react";
 import { redirect } from "next/navigation";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 
 import { db } from "@/db";
-import { users } from "@/db/schema";
+import { issues, users } from "@/db/schema";
 import { getSession } from "@/lib/session";
 
 // Users
@@ -55,3 +55,47 @@ export async function requireUser(): Promise<CurrentUser> {
   }
   return user;
 }
+
+// Issues
+
+export async function listIssues() {
+  await requireUser();
+
+  return db
+    .select({
+      id: issues.id,
+      number: issues.number,
+      title: issues.title,
+      status: issues.status,
+      priority: issues.priority,
+      createdAt: issues.createdAt,
+      assigneeName: users.name,
+    })
+    .from(issues)
+    .leftJoin(users, eq(issues.assigneeId, users.id))
+    .orderBy(desc(issues.createdAt));
+}
+
+export const getIssue = cache(async (issueNumber: number) => {
+  await requireUser();
+
+  const [issue] = await db
+    .select({
+      id: issues.id,
+      number: issues.number,
+      title: issues.title,
+      status: issues.status,
+      priority: issues.priority,
+      createdAt: issues.createdAt,
+      description: issues.description,
+      assigneeId: issues.assigneeId,
+      updatedAt: issues.updatedAt,
+      assigneeName: users.name,
+    })
+    .from(issues)
+    .leftJoin(users, eq(issues.assigneeId, users.id))
+    .where(eq(issues.number, issueNumber))
+    .limit(1);
+
+  return issue ?? null;
+});
