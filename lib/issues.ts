@@ -30,3 +30,12 @@ export const IssueFormSchema = z.object({
 });
 
 export type IssueFormInput = z.infer<typeof IssueFormSchema>;
+
+// Filters
+
+export const IssueFiltersSchema = z.object({
+  status: z.enum(ISSUE_STATUSES).optional().catch(undefined),
+  priority: z.enum(ISSUE_PRIORITIES).optional().catch(undefined),
+});
+
+export type IssueFiltersInput = z.infer<typeof IssueFiltersSchema>;
