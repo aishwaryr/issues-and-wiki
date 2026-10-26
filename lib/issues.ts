@@ -31,6 +31,21 @@ export const IssueFormSchema = z.object({
 
 export type IssueFormInput = z.infer<typeof IssueFormSchema>;
 
+export const ISSUE_FIELDS = [
+  "title",
+  "description",
+  "status",
+  "priority",
+] as const;
+
+type IssueField = keyof IssueFormInput;
+
+export type IssueFormState = {
+  errors?: Partial<Record<IssueField, string[]>>;
+  message?: string;
+  values?: Record<IssueField, string>;
+};
+
 // Filters
 
 export const IssueFiltersSchema = z.object({
