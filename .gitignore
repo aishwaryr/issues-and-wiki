@@ -38,3 +38,6 @@ next-env.d.ts
 /playwright-report
 /blob-report
 /playwright/.cache
+
+# local planning notes (AI plan + review), kept off GitHub
+/docs/
