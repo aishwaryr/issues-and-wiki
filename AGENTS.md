@@ -31,7 +31,7 @@ Every feature is built in the same six layers. "Layer N" in a request means this
 
 1. **Schema:** `db/schema.ts` (shared). Tables, columns and pg enums; the source of the TS row types. Change it, then `npm run db:generate` for a migration.
 2. **DAL:** `lib/dal.ts` (shared, `import "server-only"`). Reads only. Every query calls `requireUser()` first; one-row reads are wrapped in React `cache()`.
-3. **Rules:** `lib/<feature>.ts`. Enum values and union types, Zod schemas (`<X>FormSchema`, `<X>FiltersSchema`), key/slug helpers. No database calls. The form state type and field list belong here too; issues and wiki still keep `<X>FormState` in their actions file.
+3. **Rules:** `lib/<feature>.ts`. Enum values and union types, Zod schemas (`<X>FormSchema`, `<X>FiltersSchema`), key/slug helpers. No database calls. The form state type and field list belong here too; wiki still keeps `WikiPageFormState` in its actions file.
 4. **Actions:** `app/actions/<feature>.ts`. Only `"use server"` async functions: `requireUser()` → `safeParse` → write in `try/catch` → `revalidatePath` → `redirect` (outside the `try`). Create/update return `<X>FormState`; delete/assign/link return `void` and throw on failure.
 5. **Pages:** `app/(dashboard)/<feature>/**/page.tsx`. Async Server Components: await the DAL, type props with `PageProps<"/route">`, call `notFound()` for bad params, bind actions with `.bind(null, id)`.
 6. **Forms (client):** `app/(dashboard)/<feature>/<feature>-form.tsx` and small client buttons next to their page. `"use client"` + `useActionState`. The only layer that runs in the browser.

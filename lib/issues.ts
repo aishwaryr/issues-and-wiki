@@ -96,7 +96,7 @@ export function parseIssueKey(key: string): number | null {
 // Form
 
 /** Validates the create/edit issue form; shared by createIssue and updateIssue. */
-export const IssueSchema = z.object({
+export const IssueFormSchema = z.object({
   title: z
     .string({ error: "Title is required" })
     .trim()
@@ -111,8 +111,26 @@ export const IssueSchema = z.object({
   priority: z.enum(ISSUE_PRIORITIES, { error: "Choose a valid priority" }),
 });
 
-/** Type: parsed issue form values, as returned by `IssueSchema.parse`. */
-export type IssueInput = z.infer<typeof IssueSchema>;
+/** Type: parsed issue form values, as returned by `IssueFormSchema.parse`. */
+export type IssueFormInput = z.infer<typeof IssueFormSchema>;
+
+/** Form field names read from FormData by createIssue/updateIssue. */
+export const ISSUE_FIELDS = [
+  "title",
+  "description",
+  "status",
+  "priority",
+] as const;
+
+/** Type: one issue form field name — keys for field errors and refill values. */
+export type IssueField = keyof IssueFormInput;
+
+/** Type: createIssue/updateIssue result for useActionState — errors, plus raw values to refill the form. */
+export type IssueFormState = {
+  errors?: Partial<Record<IssueField, string[]>>;
+  message?: string;
+  values?: Record<IssueField, string>;
+};
 
 // Filters
 

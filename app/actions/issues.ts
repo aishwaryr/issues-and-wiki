@@ -9,18 +9,12 @@ import { db } from "@/db";
 import { issueWikiLinks, issues } from "@/db/schema";
 import { requireUser } from "@/lib/dal";
 import { readForm } from "@/lib/form-data";
-import { formatIssueKey, IssueSchema, type IssueInput } from "@/lib/issues";
-
-const ISSUE_FIELDS = ["title", "description", "status", "priority"] as const;
-
-type IssueField = keyof IssueInput;
-
-/** Type: createIssue/updateIssue result for useActionState — errors, plus raw values to refill the form. */
-export type IssueFormState = {
-  errors?: Partial<Record<IssueField, string[]>>;
-  message?: string;
-  values?: Record<IssueField, string>;
-};
+import {
+  formatIssueKey,
+  ISSUE_FIELDS,
+  IssueFormSchema,
+  type IssueFormState,
+} from "@/lib/issues";
 
 /** Validates the new-issue form and creates the issue. */
 export async function createIssue(
@@ -30,7 +24,7 @@ export async function createIssue(
   await requireUser();
 
   const values = readForm(formData, ISSUE_FIELDS);
-  const result = IssueSchema.safeParse(values);
+  const result = IssueFormSchema.safeParse(values);
 
   if (!result.success) {
     return { errors: flattenError(result.error).fieldErrors, values };
@@ -65,7 +59,7 @@ export async function updateIssue(
 
   const values = readForm(formData, ISSUE_FIELDS);
 
-  const result = IssueSchema.safeParse(values);
+  const result = IssueFormSchema.safeParse(values);
   if (!result.success) {
     return {
       errors: flattenError(result.error).fieldErrors,
