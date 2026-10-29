@@ -26,6 +26,7 @@ test("edits an issue and shows the saved values", async ({ page }) => {
   await page.goto(issue.url);
   await page.getByRole("link", { name: "Edit" }).click();
   await expectPath(page, `${issue.url}/edit`);
+  await expect(page).toHaveTitle(`Edit ${issue.key} · Issues + Wiki`);
 
   await expect(page.getByLabel("Title")).toHaveValue(issue.title);
   await page.getByLabel("Title").fill(newTitle);
@@ -56,4 +57,23 @@ test("shows a field error and does not save", async ({ page }) => {
   await page.getByRole("link", { name: "Cancel" }).click();
   await expectPath(page, issue.url);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(issue.title);
+});
+
+test("redirects a lowercase key to the canonical edit URL", async ({
+  page,
+}) => {
+  const issue = await insertIssue(TITLE_PREFIX);
+
+  await page.goto(`${issue.url.toLowerCase()}/edit`);
+
+  await expectPath(page, `${issue.url}/edit`);
+});
+
+test("shows the not-found page for a bad or missing key", async ({ page }) => {
+  for (const url of ["/issues/ISS-999999999/edit", "/issues/banana/edit"]) {
+    await page.goto(url);
+    await expect(
+      page.getByRole("heading", { name: "Page not found" }),
+    ).toBeVisible();
+  }
 });
