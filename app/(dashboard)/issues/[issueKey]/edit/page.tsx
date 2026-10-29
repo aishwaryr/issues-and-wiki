@@ -10,8 +10,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { getIssue } from "@/lib/dal";
-import { formatIssueKey, parseIssueKey } from "@/lib/issues";
+import { getIssueByKey } from "@/lib/dal";
+import { formatIssueKey } from "@/lib/issues";
 
 import { IssueForm } from "../../issue-form";
 
@@ -19,15 +19,11 @@ export async function generateMetadata({
   params,
 }: PageProps<"/issues/[issueKey]/edit">): Promise<Metadata> {
   const { issueKey } = await params;
-  const issueNumber = parseIssueKey(issueKey);
-  if (issueNumber === null) {
-    notFound();
-  }
-  const issue = await getIssue(issueNumber);
+  const issue = await getIssueByKey(issueKey);
   if (issue === null) {
     notFound();
   }
-  return { title: `Edit ${formatIssueKey(issueNumber)}` };
+  return { title: `Edit ${formatIssueKey(issue.number)}` };
 }
 
 export default async function EditIssuePage({
@@ -35,17 +31,12 @@ export default async function EditIssuePage({
 }: PageProps<"/issues/[issueKey]/edit">) {
   const { issueKey } = await params;
 
-  const issueNumber = parseIssueKey(issueKey);
-  if (issueNumber === null) {
-    notFound();
-  }
-  if (issueKey !== formatIssueKey(issueNumber)) {
-    redirect(`/issues/${formatIssueKey(issueNumber)}/edit`);
-  }
-
-  const issue = await getIssue(issueNumber);
+  const issue = await getIssueByKey(issueKey);
   if (issue === null) {
     notFound();
+  }
+  if (issueKey !== formatIssueKey(issue.number)) {
+    redirect(`/issues/${formatIssueKey(issue.number)}/edit`);
   }
   const updateIssueWithId = updateIssue.bind(null, issue.id);
 

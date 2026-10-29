@@ -14,17 +14,12 @@ import { UserAvatar } from "@/components/user-avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
-  getIssue,
+  getIssueByKey,
   listLinkedWikiPages,
   listWikiPages,
   requireUser,
 } from "@/lib/dal";
-import {
-  formatIssueKey,
-  parseIssueKey,
-  PRIORITY_CONFIG,
-  STATUS_CONFIG,
-} from "@/lib/issues";
+import { formatIssueKey, PRIORITY_CONFIG, STATUS_CONFIG } from "@/lib/issues";
 
 import { AssignIssueButton } from "./assign-issue-button";
 import { DeleteIssueButton } from "./delete-issue-button";
@@ -34,11 +29,7 @@ export async function generateMetadata({
   params,
 }: PageProps<"/issues/[issueKey]">): Promise<Metadata> {
   const { issueKey } = await params;
-  const issueNumber = parseIssueKey(issueKey);
-  if (issueNumber === null) {
-    notFound();
-  }
-  const issue = await getIssue(issueNumber);
+  const issue = await getIssueByKey(issueKey);
   if (issue === null) {
     notFound();
   }
@@ -49,16 +40,12 @@ export default async function IssuePage({
   params,
 }: PageProps<"/issues/[issueKey]">) {
   const { issueKey } = await params;
-  const issueNumber = parseIssueKey(issueKey);
-  if (issueNumber === null) {
-    notFound();
-  }
-  if (issueKey !== formatIssueKey(issueNumber)) {
-    redirect(`/issues/${formatIssueKey(issueNumber)}`);
-  }
-  const issue = await getIssue(issueNumber);
+  const issue = await getIssueByKey(issueKey);
   if (issue === null) {
     notFound();
+  }
+  if (issueKey !== formatIssueKey(issue.number)) {
+    redirect(`/issues/${formatIssueKey(issue.number)}`);
   }
 
   const [user, linkedPages, allPages] = await Promise.all([
