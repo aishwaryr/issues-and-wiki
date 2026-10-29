@@ -3,7 +3,6 @@
 import { useActionState } from "react";
 import Link from "next/link";
 
-import type { IssueFormState } from "@/app/actions/issues";
 import { PriorityIcon, StatusIcon } from "@/components/issue-icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,7 +15,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { PRIORITY_OPTIONS, STATUS_OPTIONS } from "@/lib/issues";
+import {
+  type IssueFormState,
+  PRIORITY_OPTIONS,
+  STATUS_OPTIONS,
+} from "@/lib/issues";
 
 /** Type: props for IssueForm — which action to call, and what differs between new and edit. */
 type IssueFormProps = {
