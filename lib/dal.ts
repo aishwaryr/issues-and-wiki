@@ -6,7 +6,7 @@ import { and, asc, desc, eq } from "drizzle-orm";
 
 import { db } from "@/db";
 import { issueWikiLinks, issues, users, wikiPages } from "@/db/schema";
-import type { IssueFiltersInput } from "@/lib/issues";
+import { parseIssueKey, type IssueFiltersInput } from "@/lib/issues";
 import { getSession } from "@/lib/session";
 
 // Users
@@ -109,6 +109,15 @@ export const getIssue = cache(async (issueNumber: number) => {
 
   return issue ?? null;
 });
+
+/** One issue by its URL key ("ISS-10"), or null if the key is invalid or no issue matches. */
+export async function getIssueByKey(issueKey: string) {
+  const issueNumber = parseIssueKey(issueKey);
+  if (issueNumber === null) {
+    return null;
+  }
+  return getIssue(issueNumber);
+}
 
 // Wiki pages
 
