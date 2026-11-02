@@ -2,25 +2,28 @@
 @plugin "@tailwindcss/typography";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Cool neutrals with one indigo accent: quiet surfaces, so status colors and data stand out. */
+  --background: #fbfbfc;
+  --foreground: #1b1c22;
   --card: #ffffff;
-  --card-foreground: #171717;
+  --card-foreground: #1b1c22;
   /* Pop-up surfaces (select menus, popovers). Same as card. */
   --popover: #ffffff;
-  --popover-foreground: #171717;
-  --primary: #171717;
-  --primary-foreground: #fafafa;
-  --secondary: #f5f5f5;
-  --secondary-foreground: #171717;
-  --muted: #f5f5f5;
-  --muted-foreground: #737373;
-  --accent: #f5f5f5;
-  --accent-foreground: #171717;
+  --popover-foreground: #1b1c22;
+  --primary: #5e6ad2;
+  --primary-foreground: #ffffff;
+  --secondary: #f2f3f6;
+  --secondary-foreground: #1b1c22;
+  --muted: #f2f3f6;
+  --muted-foreground: #6b6f7b;
+  --accent: #eff0f4;
+  --accent-foreground: #1b1c22;
   --destructive: #dc2626;
-  --border: #e5e5e5;
-  --input: #e5e5e5;
-  --ring: #a3a3a3;
+  --border: #e6e7ec;
+  --input: #e1e2e8;
+  --ring: #5e6ad2;
+  /* Single-series chart marks (validated against the card surface). */
+  --chart-1: #5e6ad2;
 }
 
 @theme inline {
@@ -42,37 +45,40 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-    --card: #171717;
-    --card-foreground: #fafafa;
-    --popover: #171717;
-    --popover-foreground: #fafafa;
-    --primary: #fafafa;
-    --primary-foreground: #171717;
-    --secondary: #262626;
-    --secondary-foreground: #fafafa;
-    --muted: #262626;
-    --muted-foreground: #a3a3a3;
-    --accent: #262626;
-    --accent-foreground: #fafafa;
+    --background: #0f1013;
+    --foreground: #e6e7eb;
+    --card: #16171b;
+    --card-foreground: #e6e7eb;
+    --popover: #1b1c21;
+    --popover-foreground: #e6e7eb;
+    --primary: #6f7ae0;
+    --primary-foreground: #ffffff;
+    --secondary: #1f2026;
+    --secondary-foreground: #e6e7eb;
+    --muted: #1f2026;
+    --muted-foreground: #8b8f9a;
+    --accent: #23242b;
+    --accent-foreground: #e6e7eb;
     --destructive: #f87171;
-    --border: #404040;
-    --input: #404040;
-    --ring: #737373;
+    --border: #26272e;
+    --input: #2e2f37;
+    --ring: #6f7ae0;
+    --chart-1: #7c86e8;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-feature-settings: "cv11", "ss01";
 }
 
 @layer base {

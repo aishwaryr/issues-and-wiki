@@ -10,16 +10,17 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## Project
 
-Issues + Wiki: a work-tracking and shared-documentation app, built while following lessons from [Next.js Fundamentals](https://github.com/Hendrixer/next.js-fundamentals/tree/main/lessons).
+Triagebook (formerly "Issues + Wiki"): a work-tracking and shared-documentation app, built while following lessons from [Next.js Fundamentals](https://github.com/Hendrixer/next.js-fundamentals/tree/main/lessons).
 
 **Stack:** Next.js App Router (v16, webpack dev/build), React 19, TypeScript, Tailwind CSS v4, shadcn/ui (`new-york` style, `neutral` base, Lucide icons — see `components.json`), Drizzle ORM + Neon Postgres (`db/schema.ts`, `db/index.ts`).
 
-**Current state:** auth, issues (with comments and assign to anyone) and wiki are done; the dashboard (`/`), then deploy on Vercel, then AI features are next.
+**Current state:** auth, issues (with comments and assign to anyone), wiki and the dashboard are done; deploy on Vercel, then AI features are next.
 - Auth: sign-up, sign-in and sign-out server actions in `app/actions/auth.ts`; database sessions in `lib/session.ts`, bcrypt in `lib/password.ts`, a server-only data access layer in `lib/dal.ts`.
 - Issues: CRUD, URL filters, `ISS-n` keys (`getIssueByKey` in the DAL) and assign to any user (`AssigneeSchema`, `UNASSIGNED` select value); actions in `app/actions/issues.ts`, schemas and key helpers in `lib/issues.ts`.
 - Comments: a list and form on the issue page; `listComments` in the DAL, rules in `lib/comments.ts`, `addComment` in `app/actions/comments.ts` (the author comes from the session).
 - Wiki: markdown pages at `/wiki/[slug]` (`components/markdown.tsx`, no raw HTML); slugs come from titles and never change (`lib/wiki.ts`); actions in `app/actions/wiki.ts`. Issues ↔ pages links live in a join table; link/unlink actions are in `app/actions/issues.ts`.
-- Routes: `app/(auth)` is public and redirects signed-in users to `/`; `app/(dashboard)` is guarded and renders the navbar. `/` is a placeholder dashboard.
+- Routes: `app/(auth)` is public and redirects signed-in users to `/`; `app/(dashboard)` is guarded and renders the navbar. `/` is the dashboard: `getIssueStats`, `countIssuesCreatedPerDay` and `listRecentIssues` in the DAL, a no-library column chart in `components/created-chart.tsx`.
+- Theme: tokens in `app/globals.css` (cool neutrals, indigo `--primary`, `--chart-1`, separate dark values), Geist via `next/font`; brand mark in `components/brand.tsx`.
 - Schema: `users`, `issues`, `sessions`, `wiki_pages`, `issue_wiki_links`, `issue_comments`, with migrations in `drizzle/` (latest `0008`). `DATABASE_URL` in `.env.local` is required — every page reads the session.
 
 **Commands:** `npm run dev` / `build` / `start` / `lint`; `npm run db:generate` / `db:migrate` / `db:push` / `db:studio` (Drizzle Kit); `npm run pw:run` (all Playwright e2e in `tests/e2e/`, against a fresh production build on :3100) or `npx playwright test tests/e2e/<feature>.spec.ts` for one feature. Playwright is the only e2e suite. Node 24 via `.nvmrc`.

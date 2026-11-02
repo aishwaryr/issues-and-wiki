@@ -31,9 +31,7 @@ test("shows the issue's key, title, description and fields", async ({
   await expect(detailField(page, "Status")).toContainText("In progress");
   await expect(detailField(page, "Priority")).toContainText("Urgent");
   await expect(detailField(page, "Assignee")).toHaveText("Unassigned");
-  await expect(page).toHaveTitle(
-    `${issue.key} · ${issue.title} · Issues + Wiki`,
-  );
+  await expect(page).toHaveTitle(`${issue.key} · ${issue.title} · Triagebook`);
 });
 
 test("shows a placeholder when there is no description", async ({ page }) => {
