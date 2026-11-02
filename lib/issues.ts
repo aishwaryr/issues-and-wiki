@@ -93,6 +93,13 @@ export function parseIssueKey(key: string): number | null {
   return issueNumber <= PG_INT_MAX ? issueNumber : null;
 }
 
+// Assignee
+
+/** Validates an assignee field: a user id, or `""` for Unassigned → `null`. */
+export const AssigneeSchema = z
+  .union([z.uuid({ error: "Choose a valid assignee" }), z.literal("")])
+  .transform((value) => value || null);
+
 // Form
 
 /** Validates the create/edit issue form; shared by createIssue and updateIssue. */
@@ -109,6 +116,7 @@ export const IssueFormSchema = z.object({
     .transform((value) => value || undefined),
   status: z.enum(ISSUE_STATUSES, { error: "Choose a valid status" }),
   priority: z.enum(ISSUE_PRIORITIES, { error: "Choose a valid priority" }),
+  assigneeId: AssigneeSchema,
 });
 
 /** Type: parsed issue form values, as returned by `IssueFormSchema.parse`. */
@@ -120,6 +128,7 @@ export const ISSUE_FIELDS = [
   "description",
   "status",
   "priority",
+  "assigneeId",
 ] as const;
 
 /** Type: one issue form field name — keys for field errors and refill values. */

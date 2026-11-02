@@ -10,6 +10,7 @@ import { issueWikiLinks, issues } from "@/db/schema";
 import { requireUser } from "@/lib/dal";
 import { readForm } from "@/lib/form-data";
 import {
+  AssigneeSchema,
   formatIssueKey,
   ISSUE_FIELDS,
   IssueFormSchema,
@@ -112,18 +113,28 @@ export async function deleteIssue(id: string): Promise<void> {
   redirect("/issues");
 }
 
-/** Assigns an issue to the signed-in user, or unassigns it. */
-export async function assignIssue(id: string, assign: boolean): Promise<void> {
-  const user = await requireUser();
+/** Sets an issue's assignee from the form: a user id, or "" to unassign. */
+export async function assignIssue(
+  id: string,
+  formData: FormData,
+): Promise<void> {
+  await requireUser();
+
+  const result = AssigneeSchema.safeParse(formData.get("assigneeId") ?? "");
+
+  if (!result.success) {
+    throw new Error("Choose a valid assignee.");
+  }
 
   let updated: { issueNumber: number } | undefined;
   try {
     [updated] = await db
       .update(issues)
-      .set({ assigneeId: assign ? user.id : null, updatedAt: new Date() })
+      .set({ assigneeId: result.data, updatedAt: new Date() })
       .where(eq(issues.id, id))
       .returning({ issueNumber: issues.number });
   } catch (error) {
+    // A foreign key error lands here: the chosen user was just deleted.
     console.error("assignIssue failed", error);
     throw new Error("Could not update the assignee. Try again.");
   }
