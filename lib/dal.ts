@@ -5,7 +5,13 @@ import { redirect } from "next/navigation";
 import { and, asc, desc, eq } from "drizzle-orm";
 
 import { db } from "@/db";
-import { issueWikiLinks, issues, users, wikiPages } from "@/db/schema";
+import {
+  issueComments,
+  issueWikiLinks,
+  issues,
+  users,
+  wikiPages,
+} from "@/db/schema";
 import { parseIssueKey, type IssueFiltersInput } from "@/lib/issues";
 import { getSession } from "@/lib/session";
 
@@ -131,6 +137,23 @@ export async function getIssueByKey(issueKey: string) {
     return null;
   }
   return getIssue(issueNumber);
+}
+
+/** Comments on an issue, oldest first, with the author's name (null if the author was deleted). */
+export async function listComments(issueId: string) {
+  await requireUser();
+
+  return db
+    .select({
+      id: issueComments.id,
+      body: issueComments.body,
+      createdAt: issueComments.createdAt,
+      authorName: users.name,
+    })
+    .from(issueComments)
+    .leftJoin(users, eq(issueComments.authorId, users.id))
+    .where(eq(issueComments.issueId, issueId))
+    .orderBy(asc(issueComments.createdAt));
 }
 
 // Wiki pages

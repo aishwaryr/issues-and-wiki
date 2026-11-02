@@ -166,3 +166,36 @@ export const issueWikiLinksRelations = relations(issueWikiLinks, ({ one }) => ({
     references: [wikiPages.id],
   }),
 }));
+
+// Comments
+
+export const issueComments = pgTable(
+  "issue_comments",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    // Cascade: comments mean nothing once their issue is deleted.
+    issueId: uuid("issue_id")
+      .notNull()
+      .references(() => issues.id, { onDelete: "cascade" }),
+    // Set null: a comment stays when its author is deleted.
+    authorId: uuid("author_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    body: text("body").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [index("issue_comments_issue_id_idx").on(table.issueId)],
+);
+
+export const issueCommentsRelations = relations(issueComments, ({ one }) => ({
+  issue: one(issues, {
+    fields: [issueComments.issueId],
+    references: [issues.id],
+  }),
+  author: one(users, {
+    fields: [issueComments.authorId],
+    references: [users.id],
+  }),
+}));

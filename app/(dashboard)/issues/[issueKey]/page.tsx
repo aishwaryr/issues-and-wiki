@@ -3,6 +3,7 @@ import Link from "next/link";
 import { FileText, X } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
 
+import { addComment } from "@/app/actions/comments";
 import {
   assignIssue,
   deleteIssue,
@@ -15,15 +16,18 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   getIssueByKey,
+  listComments,
   listLinkedWikiPages,
   listUsers,
   listWikiPages,
   requireUser,
 } from "@/lib/dal";
+import { formatDate } from "@/lib/dates";
 import { formatIssueKey, PRIORITY_CONFIG, STATUS_CONFIG } from "@/lib/issues";
 
 import { AssignIssueButton } from "./assign-issue-button";
 import { AssigneePicker } from "./assignee-picker";
+import { CommentForm } from "./comment-form";
 import { DeleteIssueButton } from "./delete-issue-button";
 import { LinkWikiPageForm } from "./link-wiki-page-form";
 
@@ -50,11 +54,12 @@ export default async function IssuePage({
     redirect(`/issues/${formatIssueKey(issue.number)}`);
   }
 
-  const [user, linkedPages, allPages, users] = await Promise.all([
+  const [user, linkedPages, allPages, users, comments] = await Promise.all([
     requireUser(),
     listLinkedWikiPages(issue.id),
     listWikiPages(),
     listUsers(),
+    listComments(issue.id),
   ]);
   const assignIssueWithId = assignIssue.bind(null, issue.id);
   const assignedToMe = issue.assigneeId === user.id;
@@ -174,6 +179,45 @@ export default async function IssuePage({
                     />
                   )
                 )}
+              </CardContent>
+            </Card>
+          </section>
+
+          <section aria-labelledby="comments-heading">
+            <Card>
+              <CardContent className="space-y-4">
+                <h2
+                  id="comments-heading"
+                  className="text-sm font-medium text-muted-foreground"
+                >
+                  Comments
+                </h2>
+                {comments.length === 0 ? (
+                  <p className="text-muted-foreground">No comments yet</p>
+                ) : (
+                  <ul className="space-y-4">
+                    {comments.map((comment) => (
+                      <li key={comment.id} className="space-y-1">
+                        <div className="flex items-center gap-2 text-sm">
+                          <UserAvatar
+                            name={comment.authorName ?? "Deleted user"}
+                          />
+                          <span className="font-medium">
+                            {comment.authorName ?? "Deleted user"}
+                          </span>
+                          <time
+                            dateTime={comment.createdAt.toISOString()}
+                            className="text-muted-foreground"
+                          >
+                            {formatDate(comment.createdAt)}
+                          </time>
+                        </div>
+                        <p className="whitespace-pre-wrap">{comment.body}</p>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <CommentForm action={addComment.bind(null, issue.id)} />
               </CardContent>
             </Card>
           </section>
