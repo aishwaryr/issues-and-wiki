@@ -57,6 +57,13 @@
       "when": 1792332177449,
       "tag": "0007_confused_lockheed",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1793631492610,
+      "tag": "0008_nosy_gambit",
+      "breakpoints": true
     }
   ]
 }
