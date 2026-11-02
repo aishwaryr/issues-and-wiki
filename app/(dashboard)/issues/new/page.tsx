@@ -8,12 +8,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { listUsers } from "@/lib/dal";
 
 import { IssueForm } from "../issue-form";
 
 export const metadata: Metadata = { title: "New issue" };
 
-export default function NewIssuePage() {
+export default async function NewIssuePage() {
+  const users = await listUsers();
   return (
     <Card className="mx-auto max-w-2xl">
       <CardHeader>
@@ -26,6 +28,7 @@ export default function NewIssuePage() {
       <CardContent>
         <IssueForm
           action={createIssue}
+          users={users}
           submitLabel="Create issue"
           pendingLabel="Creating..."
           cancelHref="/issues"

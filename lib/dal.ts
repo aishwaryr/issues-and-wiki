@@ -57,6 +57,20 @@ export async function requireUser(): Promise<CurrentUser> {
   return user;
 }
 
+/** All users, sorted by name, for the assignee picker. */
+export async function listUsers() {
+  await requireUser();
+
+  return db
+    .select({
+      id: users.id,
+      name: users.name,
+      email: users.email,
+    })
+    .from(users)
+    .orderBy(asc(users.name));
+}
+
 // Issues
 
 /** All issues, newest first, filtered by status and priority when given. */

@@ -16,9 +16,11 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  type AssigneeOption,
   type IssueFormState,
   PRIORITY_OPTIONS,
   STATUS_OPTIONS,
+  UNASSIGNED,
 } from "@/lib/issues";
 
 /** Type: props for IssueForm — which action to call, and what differs between new and edit. */
@@ -31,6 +33,7 @@ type IssueFormProps = {
   submitLabel: string;
   pendingLabel: string;
   cancelHref: string;
+  users: AssigneeOption[];
 };
 
 /** The issue form, shared by the new and edit pages. */
@@ -40,6 +43,7 @@ export function IssueForm({
   submitLabel,
   pendingLabel,
   cancelHref,
+  users,
 }: IssueFormProps) {
   const [state, formAction, pending] = useActionState(action, {
     values: initialValues,
@@ -171,6 +175,44 @@ export function IssueForm({
             </p>
           )}
         </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="assigneeId">Assignee</Label>
+        <Select
+          key={state.values?.assigneeId}
+          name="assigneeId"
+          defaultValue={state.values?.assigneeId || UNASSIGNED}
+        >
+          <SelectTrigger
+            id="assigneeId"
+            className="w-full"
+            aria-invalid={!!state.errors?.assigneeId}
+            aria-describedby={
+              state.errors?.assigneeId ? "assigneeId-error" : undefined
+            }
+          >
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={UNASSIGNED}>Unassigned</SelectItem>
+            {users.map((user) => (
+              <SelectItem key={user.id} value={user.id}>
+                {user.name}
+                <span className="text-muted-foreground">{user.email}</span>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {state.errors?.assigneeId && (
+          <p
+            id="assigneeId-error"
+            role="alert"
+            className="text-sm text-destructive"
+          >
+            {state.errors.assigneeId[0]}
+          </p>
+        )}
       </div>
 
       <div className="flex justify-end gap-2">
