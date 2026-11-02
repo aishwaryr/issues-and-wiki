@@ -11,7 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { getIssueByKey, listUsers } from "@/lib/dal";
-import { formatIssueKey } from "@/lib/issues";
+import { formatIssueKey, UNASSIGNED } from "@/lib/issues";
 
 import { IssueForm } from "../../issue-form";
 
@@ -46,7 +46,7 @@ export default async function EditIssuePage({
     description: issue.description ?? "",
     status: issue.status,
     priority: issue.priority,
-    assigneeId: issue.assigneeId ?? "",
+    assigneeId: issue.assigneeId ?? UNASSIGNED,
   };
 
   return (
@@ -72,6 +72,7 @@ export default async function EditIssuePage({
           <IssueForm
             action={updateIssueWithId}
             initialValues={initialValues}
+            users={users}
             submitLabel="Save changes"
             pendingLabel="Saving..."
             cancelHref={`/issues/${issueKey}`}

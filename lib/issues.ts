@@ -103,6 +103,9 @@ export const AssigneeSchema = z
   .union([z.uuid({ error: "Choose a valid assignee" }), z.literal(UNASSIGNED)])
   .transform((value) => (value === UNASSIGNED ? null : value));
 
+/** Type: a user shown in an assignee picker. */
+export type AssigneeOption = { id: string; name: string; email: string };
+
 // Form
 
 /** Validates the create/edit issue form; shared by createIssue and updateIssue. */

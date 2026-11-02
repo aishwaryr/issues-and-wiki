@@ -11,10 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { UNASSIGNED } from "@/lib/issues";
-
-/** Type: a user the issue can be assigned to. */
-type UserOption = { id: string; name: string; email: string };
+import { type AssigneeOption, UNASSIGNED } from "@/lib/issues";
 
 /** Assignee select + "Save" button; sends a user id or UNASSIGNED to the action. */
 export function AssigneePicker({
@@ -22,7 +19,7 @@ export function AssigneePicker({
   assigneeId,
   action,
 }: {
-  users: UserOption[];
+  users: AssigneeOption[];
   assigneeId: string | null;
   action: (formData: FormData) => Promise<void>;
 }) {
