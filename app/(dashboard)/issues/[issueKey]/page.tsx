@@ -16,12 +16,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import {
   getIssueByKey,
   listLinkedWikiPages,
+  listUsers,
   listWikiPages,
   requireUser,
 } from "@/lib/dal";
 import { formatIssueKey, PRIORITY_CONFIG, STATUS_CONFIG } from "@/lib/issues";
 
 import { AssignIssueButton } from "./assign-issue-button";
+import { AssigneePicker } from "./assignee-picker";
 import { DeleteIssueButton } from "./delete-issue-button";
 import { LinkWikiPageForm } from "./link-wiki-page-form";
 
@@ -48,11 +50,13 @@ export default async function IssuePage({
     redirect(`/issues/${formatIssueKey(issue.number)}`);
   }
 
-  const [user, linkedPages, allPages] = await Promise.all([
+  const [user, linkedPages, allPages, users] = await Promise.all([
     requireUser(),
     listLinkedWikiPages(issue.id),
     listWikiPages(),
+    listUsers(),
   ]);
+  const assignIssueWithId = assignIssue.bind(null, issue.id);
   const assignedToMe = issue.assigneeId === user.id;
   const linkedIds = new Set(linkedPages.map((page) => page.id));
   const linkablePages = allPages.filter((page) => !linkedIds.has(page.id));
@@ -80,7 +84,8 @@ export default async function IssuePage({
           </Button>
           <AssignIssueButton
             assignedToMe={assignedToMe}
-            action={assignIssue.bind(null, issue.id, !assignedToMe)}
+            userId={user.id}
+            action={assignIssueWithId}
           />
           <DeleteIssueButton action={deleteIssue.bind(null, issue.id)} />
         </div>
@@ -217,6 +222,14 @@ export default async function IssuePage({
                 </time>
               </dd>
             </dl>
+            <div className="mt-4 border-t pt-4">
+              <AssigneePicker
+                key={issue.assigneeId ?? "none"}
+                users={users}
+                assigneeId={issue.assigneeId}
+                action={assignIssueWithId}
+              />
+            </div>
           </CardContent>
         </Card>
       </div>

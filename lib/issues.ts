@@ -95,10 +95,13 @@ export function parseIssueKey(key: string): number | null {
 
 // Assignee
 
-/** Validates an assignee field: a user id, or `""` for Unassigned → `null`. */
+/** Select value for "Unassigned"; Radix Select items can't use an empty string. */
+export const UNASSIGNED = "unassigned";
+
+/** Validates an assignee field: a user id, or `UNASSIGNED` → `null`. */
 export const AssigneeSchema = z
-  .union([z.uuid({ error: "Choose a valid assignee" }), z.literal("")])
-  .transform((value) => value || null);
+  .union([z.uuid({ error: "Choose a valid assignee" }), z.literal(UNASSIGNED)])
+  .transform((value) => (value === UNASSIGNED ? null : value));
 
 // Form
 
