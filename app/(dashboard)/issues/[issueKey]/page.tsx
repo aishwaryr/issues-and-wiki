@@ -22,7 +22,7 @@ import {
   listWikiPages,
   requireUser,
 } from "@/lib/dal";
-import { formatDate } from "@/lib/dates";
+import { formatDate, formatRelative } from "@/lib/dates";
 import { formatIssueKey, PRIORITY_CONFIG, STATUS_CONFIG } from "@/lib/issues";
 
 import { AssignIssueButton } from "./assign-issue-button";
@@ -78,7 +78,7 @@ export default async function IssuePage({
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0 space-y-1">
           <p className="font-mono text-sm text-muted-foreground">{issueKey}</p>
-          <h1 className="text-2xl font-semibold wrap-break-word">
+          <h1 className="text-2xl font-semibold tracking-tight wrap-break-word">
             {issue.title}
           </h1>
         </div>
@@ -183,43 +183,49 @@ export default async function IssuePage({
             </Card>
           </section>
 
-          <section aria-labelledby="comments-heading">
-            <Card>
-              <CardContent className="space-y-4">
-                <h2
-                  id="comments-heading"
-                  className="text-sm font-medium text-muted-foreground"
-                >
-                  Comments
-                </h2>
-                {comments.length === 0 ? (
-                  <p className="text-muted-foreground">No comments yet</p>
-                ) : (
-                  <ul className="space-y-4">
-                    {comments.map((comment) => (
-                      <li key={comment.id} className="space-y-1">
-                        <div className="flex items-center gap-2 text-sm">
-                          <UserAvatar
-                            name={comment.authorName ?? "Deleted user"}
-                          />
-                          <span className="font-medium">
-                            {comment.authorName ?? "Deleted user"}
-                          </span>
+          <section aria-labelledby="comments-heading" className="space-y-4">
+            <h2
+              id="comments-heading"
+              className="flex items-center gap-2 text-sm font-medium"
+            >
+              Comments
+              <span className="rounded-full bg-muted px-1.5 text-xs text-muted-foreground tabular-nums">
+                {comments.length}
+              </span>
+            </h2>
+            {comments.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No comments yet</p>
+            ) : (
+              // A thin rail on the left ties the comments into one timeline, like Linear's activity feed.
+              <ol className="relative space-y-4 before:absolute before:top-2 before:bottom-2 before:left-3.5 before:w-px before:bg-border">
+                {comments.map((comment) => {
+                  const author = comment.authorName ?? "Deleted user";
+                  return (
+                    <li key={comment.id} className="relative flex gap-3">
+                      <span className="rounded-full ring-4 ring-background">
+                        <UserAvatar name={author} size="md" />
+                      </span>
+                      <div className="min-w-0 flex-1 rounded-lg border bg-card px-3.5 py-2.5 shadow-xs">
+                        <p className="flex items-baseline gap-2 text-sm">
+                          <span className="font-medium">{author}</span>
                           <time
                             dateTime={comment.createdAt.toISOString()}
-                            className="text-muted-foreground"
+                            title={formatDate(comment.createdAt)}
+                            className="text-xs text-muted-foreground"
                           >
-                            {formatDate(comment.createdAt)}
+                            {formatRelative(comment.createdAt)}
                           </time>
-                        </div>
-                        <p className="whitespace-pre-wrap">{comment.body}</p>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-                <CommentForm action={addComment.bind(null, issue.id)} />
-              </CardContent>
-            </Card>
+                        </p>
+                        <p className="mt-1 text-sm leading-relaxed whitespace-pre-wrap wrap-break-word">
+                          {comment.body}
+                        </p>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ol>
+            )}
+            <CommentForm action={addComment.bind(null, issue.id)} />
           </section>
         </div>
 

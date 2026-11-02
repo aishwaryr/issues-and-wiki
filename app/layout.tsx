@@ -14,10 +14,10 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Issues + Wiki",
-    template: "%s · Issues + Wiki",
+    default: "Triagebook",
+    template: "%s · Triagebook",
   },
-  description: "Track issues and write docs in one place.",
+  description: "Triage issues and keep the docs next to them.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

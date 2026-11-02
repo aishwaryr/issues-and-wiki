@@ -21,7 +21,7 @@ export function NavLinks({ loggedIn }: { loggedIn: boolean }) {
   if (!loggedIn) return null;
 
   return (
-    <div className="flex items-center gap-5">
+    <div className="flex items-center gap-1">
       {links.map((link) => {
         const active = isActive(pathname, link.href);
         return (
@@ -30,10 +30,10 @@ export function NavLinks({ loggedIn }: { loggedIn: boolean }) {
             href={link.href}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "text-sm transition-colors",
+              "rounded-md px-2.5 py-1.5 text-sm transition-colors",
               active
-                ? "text-foreground font-medium"
-                : "text-muted-foreground hover:text-foreground",
+                ? "bg-accent font-medium text-foreground"
+                : "text-muted-foreground hover:bg-accent/60 hover:text-foreground",
             )}
           >
             {link.label}

@@ -26,7 +26,7 @@ test("edits an issue and shows the saved values", async ({ page }) => {
   await page.goto(issue.url);
   await page.getByRole("link", { name: "Edit" }).click();
   await expectPath(page, `${issue.url}/edit`);
-  await expect(page).toHaveTitle(`Edit ${issue.key} · Issues + Wiki`);
+  await expect(page).toHaveTitle(`Edit ${issue.key} · Triagebook`);
 
   await expect(page.getByLabel("Title")).toHaveValue(issue.title);
   await page.getByLabel("Title").fill(newTitle);

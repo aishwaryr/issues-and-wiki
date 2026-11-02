@@ -2,7 +2,7 @@ import "server-only";
 
 import { cache } from "react";
 import { redirect } from "next/navigation";
-import { and, asc, desc, eq } from "drizzle-orm";
+import { and, asc, count, desc, eq, gte, notInArray, sql } from "drizzle-orm";
 
 import { db } from "@/db";
 import {
@@ -12,6 +12,7 @@ import {
   users,
   wikiPages,
 } from "@/db/schema";
+import { lastDays } from "@/lib/dates";
 import { parseIssueKey, type IssueFiltersInput } from "@/lib/issues";
 import { getSession } from "@/lib/session";
 
@@ -154,6 +155,68 @@ export async function listComments(issueId: string) {
     .leftJoin(users, eq(issueComments.authorId, users.id))
     .where(eq(issueComments.issueId, issueId))
     .orderBy(asc(issueComments.createdAt));
+}
+
+// Dashboard
+
+/** Issue counts per status, plus the signed-in user's open (not done or canceled) issues. */
+export async function getIssueStats() {
+  const user = await requireUser();
+
+  // Aggregate in SQL: a handful of rows over the wire, not every issue.
+  const [byStatus, [mine]] = await Promise.all([
+    db
+      .select({ status: issues.status, count: count() })
+      .from(issues)
+      .groupBy(issues.status),
+    db
+      .select({ count: count() })
+      .from(issues)
+      .where(
+        and(
+          eq(issues.assigneeId, user.id),
+          notInArray(issues.status, ["done", "canceled"]),
+        ),
+      ),
+  ]);
+
+  return { byStatus, assignedToMe: mine?.count ?? 0 };
+}
+
+/** Issues created per UTC day over the last `days` days, oldest first; days with none are 0. */
+export async function countIssuesCreatedPerDay(days: number) {
+  await requireUser();
+
+  const range = lastDays(days);
+  const day = sql<string>`to_char(${issues.createdAt} at time zone 'UTC', 'YYYY-MM-DD')`;
+  const rows = await db
+    .select({ day, count: count() })
+    .from(issues)
+    .where(gte(issues.createdAt, new Date(`${range[0]}T00:00:00Z`)))
+    .groupBy(day);
+
+  const counts = new Map(rows.map((row) => [row.day, row.count]));
+  return range.map((date) => ({ date, count: counts.get(date) ?? 0 }));
+}
+
+/** The most recently updated issues, newest first, with the assignee's name. */
+export async function listRecentIssues(limit: number) {
+  await requireUser();
+
+  return db
+    .select({
+      id: issues.id,
+      number: issues.number,
+      title: issues.title,
+      status: issues.status,
+      priority: issues.priority,
+      updatedAt: issues.updatedAt,
+      assigneeName: users.name,
+    })
+    .from(issues)
+    .leftJoin(users, eq(issues.assigneeId, users.id))
+    .orderBy(desc(issues.updatedAt))
+    .limit(limit);
 }
 
 // Wiki pages
