@@ -1,34 +1,76 @@
 # Triagebook
 
-Triage issues and keep the docs next to them. A work-tracking and shared-documentation app.
+An issue tracker and a team wiki in one app. Triage the work, and keep the docs next to the issues they explain.
 
-## Current state
+**Live demo:** https://triagebook.vercel.app
+Sign in with `demo@triagebook.dev` / `triagebook-demo`
 
-- Email/password auth: sign-up, sign-in and sign-out, with database-backed sessions
-- Signed-in pages are protected
-- Dashboard at `/`: open / in progress / done / assigned-to-you counts, a 14-day "issues created" chart, issues by status, and recently updated issues
-- Issues: create, list, filter by status and priority, view, edit, assign to any user (or yourself in one click), delete. Each issue has a readable key and URL (`/issues/ISS-12`); a lowercase key redirects to it, an unknown key shows the not-found page
-- Wiki: markdown pages with readable URLs (`/wiki/getting-started`): create, list, view, edit, delete. Raw HTML in a page is shown as text, never run
-- Comments on issues: a list with author and date, and a form that clears after posting. Deleting an issue deletes its comments; a deleted user's comments stay
-- Issues and wiki pages link to each other: an issue lists its pages, a page lists its issues
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/assets/dashboard-dark.png">
+  <img alt="Triagebook dashboard: issue counts, a 14-day chart, issues by status, and recently updated issues" src=".github/assets/dashboard-light.png">
+</picture>
 
-## Next
+## Features
 
-1. Deploy on Vercel
-2. AI features (priority triage, related items, ask the wiki)
+- **Dashboard:** open, in-progress, done and assigned-to-you counts, a 14-day "issues created" chart, issues by status, and recently updated issues.
+- **Issues:** create, edit, delete, and assign to any teammate (or yourself in one click). Each issue has a readable key and URL, like `/issues/ISS-12`.
+- **Filters in the URL:** status and priority filters live in the query string, so a filtered list can be bookmarked and shared.
+- **Comments:** a timeline on every issue, with author and date.
+- **Wiki:** markdown pages with tables, code and lists, at readable URLs like `/wiki/release-process`.
+- **Issues ↔ wiki links:** an issue lists the pages that explain it, and a page lists its issues.
+- **Auth:** email and password sign-up and sign-in, with every app page behind a session check.
+- **Light and dark themes** that follow the system setting.
 
-## How the code is organized
+## Tech stack
 
-Each feature is built in the same six layers: schema (`db/schema.ts`) → reads (`lib/dal.ts`) → rules and Zod schemas (`lib/<feature>.ts`) → server actions (`app/actions/<feature>.ts`) → pages → client forms. `AGENTS.md` describes each layer.
+| Area | Choice |
+|---|---|
+| Framework | Next.js 16 (App Router), React 19: Server Components and Server Actions |
+| Language | TypeScript |
+| UI | Tailwind CSS v4, shadcn/ui (Radix), Lucide icons, Geist |
+| Data | Neon Postgres, Drizzle ORM, Drizzle Kit migrations |
+| Validation | Zod |
+| Testing | Playwright end-to-end tests (19 specs, 43 tests) |
+| Hosting | Vercel, in the same region as the database |
 
-## Stack
+## Architecture
 
-Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4, shadcn/ui, Drizzle ORM, Neon Postgres, zod, Playwright.
+Every feature is built in the same six layers, bottom up:
+
+```mermaid
+flowchart LR
+  F["Client form<br/>useActionState"] -->|submit| A["Server action<br/>app/actions"]
+  A -->|validate| R["Rules + Zod<br/>lib/feature.ts"]
+  A -->|write| DB[(Postgres)]
+  A -->|revalidate| P["Page<br/>Server Component"]
+  P -->|read| D["Data access layer<br/>lib/dal.ts"]
+  D --> DB
+```
+
+- **Reads:** pages are async Server Components. They read through one server-only data access layer, where every query checks the session first.
+- **Writes:** forms post to Server Actions. Each action checks the user, validates with Zod, writes, revalidates the affected pages and redirects. Field errors come back to the form without losing what the user typed.
+- **Schema:** one Drizzle schema is the source of the database tables and the TypeScript row types.
+
+## Engineering notes
+
+- **Sessions:** a random 256-bit token in an `HttpOnly`, `Secure`, `SameSite=Lax` cookie. The database stores only its SHA-256 hash, so a leaked table can't be used to sign in.
+- **Passwords:** bcrypt, with the 72-byte limit checked in bytes, not characters.
+- **Readable keys:** a Postgres identity column gives each issue its `ISS-n` number. The UUID stays the primary key, so URLs and foreign keys stay independent.
+- **Data integrity:** foreign keys choose between cascade (comments and links go with their issue) and set null (a deleted user's pages and comments stay, and their issues become unassigned). A unique constraint is the final guard against duplicate emails.
+- **Safe markdown:** wiki pages render without raw HTML, and `javascript:` links are stripped.
+- **No chart library:** the dashboard chart is plain markup and CSS.
+- **Tests against production builds:** Playwright builds the app and runs it with `next start` for every run.
+
+## Roadmap
+
+- **AI features:** turn a pasted Slack thread or email into issue drafts to review; priority suggestions with a reason; related issues and pages through Postgres full-text search; and answers from the wiki with citations.
+- **Mobile layout** across the app, and an accessibility pass over all forms.
+- **Text search and an assignee filter** on the issues list, and rate limiting on sign-in.
 
 ## Run locally
 
 1. Copy `.env.example` to `.env.local` and set `DATABASE_URL` to a Postgres connection string (Neon works).
-2. Install, run the migrations, start the dev server:
+2. Install, run the migrations, and start the dev server:
 
 ```bash
 npm install
@@ -38,12 +80,12 @@ npm run dev
 
 Open http://localhost:3000. Node 24 is pinned in `.nvmrc`.
 
-## Checks
+## Tests
 
 ```bash
 npm run lint
-npm run pw:run   # all end-to-end tests (Playwright)
+npm run pw:run                                 # all end-to-end tests
 npx playwright test tests/e2e/signin.spec.ts   # one feature
 ```
 
-Specs live in `tests/e2e/`, one per feature. Playwright builds the app and runs it with `next start` on :3100 for each run, so the dev server on :3000 can keep running. The HTML report opens with `npx playwright show-report`. It runs in the locally installed Google Chrome. Sign-in, logout and guard specs use the accounts in `tests/e2e/fixtures/users.json`, which `tests/e2e/global-setup.ts` seeds before each run.
+Specs live in `tests/e2e/`, one per feature. Playwright builds the app and serves it on port 3100, so the dev server on port 3000 can keep running. `tests/e2e/global-setup.ts` seeds the test accounts before each run.
