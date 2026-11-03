@@ -1,6 +1,6 @@
 # Triagebook
 
-Triage issues and keep the docs next to them. A work-tracking and shared-documentation app (formerly "Issues + Wiki"), following selected lessons from [Next.js Fundamentals](https://github.com/Hendrixer/next.js-fundamentals/tree/main/lessons).
+Triage issues and keep the docs next to them. A work-tracking and shared-documentation app.
 
 ## Current state
 
