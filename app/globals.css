@@ -1,6 +1,9 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+/* `dark:` utilities follow a .dark class on <html>, not the OS setting. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   /* Cool neutrals with one indigo accent: quiet surfaces, so status colors and data stand out. */
   --background: #fbfbfc;
@@ -50,28 +53,29 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0f1013;
-    --foreground: #e6e7eb;
-    --card: #16171b;
-    --card-foreground: #e6e7eb;
-    --popover: #1b1c21;
-    --popover-foreground: #e6e7eb;
-    --primary: #6f7ae0;
-    --primary-foreground: #ffffff;
-    --secondary: #1f2026;
-    --secondary-foreground: #e6e7eb;
-    --muted: #1f2026;
-    --muted-foreground: #8b8f9a;
-    --accent: #23242b;
-    --accent-foreground: #e6e7eb;
-    --destructive: #f87171;
-    --border: #26272e;
-    --input: #2e2f37;
-    --ring: #6f7ae0;
-    --chart-1: #7c86e8;
-  }
+/* Dark is the only theme for now: the root layout always sets .dark.
+   A light / dark / system toggle comes later. */
+.dark {
+  color-scheme: dark;
+  --background: #0f1013;
+  --foreground: #e6e7eb;
+  --card: #16171b;
+  --card-foreground: #e6e7eb;
+  --popover: #1b1c21;
+  --popover-foreground: #e6e7eb;
+  --primary: #6f7ae0;
+  --primary-foreground: #ffffff;
+  --secondary: #1f2026;
+  --secondary-foreground: #e6e7eb;
+  --muted: #1f2026;
+  --muted-foreground: #8b8f9a;
+  --accent: #23242b;
+  --accent-foreground: #e6e7eb;
+  --destructive: #f87171;
+  --border: #26272e;
+  --input: #2e2f37;
+  --ring: #6f7ae0;
+  --chart-1: #7c86e8;
 }
 
 body {

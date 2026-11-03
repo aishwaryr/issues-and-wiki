@@ -5,10 +5,7 @@ An issue tracker and a team wiki in one app. Triage the work, and keep the docs 
 **Live demo:** https://triagebook.vercel.app
 Sign in with `demo@triagebook.dev` / `triagebook-demo`
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset=".github/assets/dashboard-dark.png">
-  <img alt="Triagebook dashboard: issue counts, a 14-day chart, issues by status, and recently updated issues" src=".github/assets/dashboard-light.png">
-</picture>
+![Triagebook dashboard: issue counts, a 14-day chart, issues by status, and recently updated issues](.github/assets/dashboard-dark.png)
 
 ## Features
 
@@ -19,7 +16,6 @@ Sign in with `demo@triagebook.dev` / `triagebook-demo`
 - **Wiki:** markdown pages with tables, code and lists, at readable URLs like `/wiki/release-process`.
 - **Issues ↔ wiki links:** an issue lists the pages that explain it, and a page lists its issues.
 - **Auth:** email and password sign-up and sign-in, with every app page behind a session check.
-- **Light and dark themes** that follow the system setting.
 
 ## Tech stack
 
