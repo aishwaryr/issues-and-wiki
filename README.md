@@ -3,7 +3,7 @@
 An issue tracker and a team wiki in one app. Triage the work, and keep the docs next to the issues they explain.
 
 **Live demo:** https://triagebook.vercel.app
-Sign in with `demo@triagebook.dev` / `triagebook-demo`
+Click **Try Demo** on the sign-in page, no account needed. (Or sign in with `demo@triagebook.dev` / `triagebook-demo`.)
 
 ![Triagebook dashboard: issue counts, a 14-day chart, issues by status, and recently updated issues](.github/assets/dashboard-dark.png)
 
