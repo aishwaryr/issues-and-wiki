@@ -2,7 +2,7 @@ import "server-only";
 
 import { createHash, randomBytes } from "node:crypto";
 import { cookies } from "next/headers";
-import { eq } from "drizzle-orm";
+import { eq, lt } from "drizzle-orm";
 
 import { db } from "@/db";
 import { sessions } from "@/db/schema";
@@ -17,6 +17,11 @@ function hashToken(token: string): string {
 export async function createSession(userId: string): Promise<void> {
   const token = randomBytes(32).toString("base64url");
   const expiresAt = new Date(Date.now() + SESSION_LIFETIME_MS);
+
+  // Housekeeping: getSession only deletes an expired row when its cookie comes back, so
+  // abandoned ones (every Try Demo visit leaves one) would pile up. Sign-ins are rare
+  // enough that sweeping here costs nothing; a cron job is the scaled-up version.
+  await db.delete(sessions).where(lt(sessions.expiresAt, new Date()));
 
   await db
     .insert(sessions)
