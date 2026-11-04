@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LogOut } from "lucide-react";
 
 import { signOut } from "@/app/actions/auth";
 import { Brand } from "@/components/brand";
@@ -12,9 +13,9 @@ export async function Navbar() {
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-md">
-      {/* Phones (< 640px): logo mark and avatar only, so everything fits in one row at 320px. */}
+      {/* Phones (< 640px): logo mark, avatar and a log-out icon only, so everything fits in one row at 320px. */}
       <nav className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-2 px-4">
-        <div className="flex min-w-0 items-center gap-3 sm:gap-6">
+        <div className="flex items-center gap-3 sm:gap-6">
           <Link href="/" className="shrink-0 rounded-md">
             <Brand compact />
           </Link>
@@ -34,7 +35,9 @@ export async function Navbar() {
                 size="sm"
                 className="px-2 sm:px-3"
               >
-                Log out
+                <LogOut aria-hidden className="sm:hidden" />
+                {/* sr-only on phones: the icon button keeps "Log out" as its name. */}
+                <span className="sr-only sm:not-sr-only">Log out</span>
               </Button>
             </form>
           </div>
