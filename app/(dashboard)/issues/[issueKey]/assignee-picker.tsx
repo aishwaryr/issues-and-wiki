@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useFormStatus } from "react-dom";
 
 import { Button } from "@/components/ui/button";
@@ -23,13 +24,22 @@ export function AssigneePicker({
   assigneeId: string | null;
   action: (formData: FormData) => Promise<void>;
 }) {
+  // Mirrors the select's value so the trigger's label is in the server HTML
+  // (Radix fills <SelectValue /> only after hydration).
+  const [selectedId, setSelectedId] = useState(assigneeId ?? UNASSIGNED);
+  const selected = users.find((user) => user.id === selectedId);
+
   return (
     <form action={action} className="space-y-2">
       <Label htmlFor="assigneeId">Assign to</Label>
       <div className="flex gap-2">
-        <Select name="assigneeId" defaultValue={assigneeId ?? UNASSIGNED}>
+        <Select
+          name="assigneeId"
+          defaultValue={assigneeId ?? UNASSIGNED}
+          onValueChange={setSelectedId}
+        >
           <SelectTrigger id="assigneeId" className="min-w-0 flex-1">
-            <SelectValue />
+            <SelectValue>{selected?.name ?? "Unassigned"}</SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value={UNASSIGNED}>Unassigned</SelectItem>

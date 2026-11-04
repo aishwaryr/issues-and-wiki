@@ -26,7 +26,7 @@ Click **Try Demo** on the sign-in page, no account needed. (Or sign in with `dem
 | UI | Tailwind CSS v4, shadcn/ui (Radix), Lucide icons, Geist |
 | Data | Neon Postgres, Drizzle ORM, Drizzle Kit migrations |
 | Validation | Zod |
-| Testing | Playwright end-to-end tests (19 specs, 43 tests) |
+| Testing | Playwright end-to-end tests, one spec per feature, run against a production build |
 | Hosting | Vercel, in the same region as the database |
 
 ## Architecture

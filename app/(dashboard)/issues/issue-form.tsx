@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import Link from "next/link";
 
 import { PriorityIcon, StatusIcon } from "@/components/issue-icons";
@@ -48,6 +48,17 @@ export function IssueForm({
   const [state, formAction, pending] = useActionState(action, {
     values: initialValues,
   });
+
+  // Radix fills <SelectValue /> only after hydration, so the server HTML showed empty
+  // selects. These mirror each select's value so its label renders on the server too.
+  const [status, setStatus] = useState(initialValues?.status ?? "backlog");
+  const [priority, setPriority] = useState(initialValues?.priority ?? "none");
+  const [assigneeId, setAssigneeId] = useState(
+    initialValues?.assigneeId || UNASSIGNED,
+  );
+  const statusOption = STATUS_OPTIONS.find((st) => st.value === status);
+  const priorityOption = PRIORITY_OPTIONS.find((pr) => pr.value === priority);
+  const assignee = users.find((user) => user.id === assigneeId);
 
   return (
     <form className="space-y-6" action={formAction}>
@@ -108,6 +119,7 @@ export function IssueForm({
             key={state.values?.status}
             name="status"
             defaultValue={state.values?.status ?? "backlog"}
+            onValueChange={setStatus}
           >
             <SelectTrigger
               id="status"
@@ -117,7 +129,14 @@ export function IssueForm({
                 state.errors?.status ? "status-error" : undefined
               }
             >
-              <SelectValue />
+              <SelectValue>
+                {statusOption && (
+                  <>
+                    <StatusIcon status={statusOption.value} aria-hidden />
+                    {statusOption.label}
+                  </>
+                )}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               {STATUS_OPTIONS.map((st) => (
@@ -145,6 +164,7 @@ export function IssueForm({
             key={state.values?.priority}
             name="priority"
             defaultValue={state.values?.priority ?? "none"}
+            onValueChange={setPriority}
           >
             <SelectTrigger
               id="priority"
@@ -154,7 +174,14 @@ export function IssueForm({
                 state.errors?.priority ? "priority-error" : undefined
               }
             >
-              <SelectValue />
+              <SelectValue>
+                {priorityOption && (
+                  <>
+                    <PriorityIcon priority={priorityOption.value} aria-hidden />
+                    {priorityOption.label}
+                  </>
+                )}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               {PRIORITY_OPTIONS.map((pr) => (
@@ -183,6 +210,7 @@ export function IssueForm({
           key={state.values?.assigneeId}
           name="assigneeId"
           defaultValue={state.values?.assigneeId || UNASSIGNED}
+          onValueChange={setAssigneeId}
         >
           <SelectTrigger
             id="assigneeId"
@@ -192,7 +220,7 @@ export function IssueForm({
               state.errors?.assigneeId ? "assigneeId-error" : undefined
             }
           >
-            <SelectValue />
+            <SelectValue>{assignee?.name ?? "Unassigned"}</SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value={UNASSIGNED}>Unassigned</SelectItem>

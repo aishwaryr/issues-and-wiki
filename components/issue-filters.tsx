@@ -1,5 +1,6 @@
 "use client";
 
+import { type ReactNode, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
@@ -12,20 +13,47 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { PriorityIcon, StatusIcon } from "@/components/issue-icons";
-import { PRIORITY_OPTIONS, STATUS_OPTIONS } from "@/lib/issues";
+import {
+  IssueFiltersSchema,
+  PRIORITY_OPTIONS,
+  STATUS_OPTIONS,
+} from "@/lib/issues";
 
 // Radix Select doesn't allow "" as an item value, so "All" uses a sentinel
 // that updateFilter turns into "remove this key from the URL".
 const ALL = "all";
+
+/** Type: one choice in a filter select, with an optional icon before the label. */
+type FilterOption = { value: string; label: string; icon?: ReactNode };
+
+const STATUS_FILTER_OPTIONS: FilterOption[] = STATUS_OPTIONS.map(
+  ({ value, label }) => ({
+    value,
+    label,
+    // aria-hidden: the text label already names the option
+    icon: <StatusIcon status={value} aria-hidden />,
+  }),
+);
+
+const PRIORITY_FILTER_OPTIONS: FilterOption[] = PRIORITY_OPTIONS.map(
+  ({ value, label }) => ({
+    value,
+    label,
+    icon: <PriorityIcon priority={value} aria-hidden />,
+  }),
+);
 
 export function IssueFilters() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const status = searchParams.get("status") ?? "";
-  const priority = searchParams.get("priority") ?? "";
-  const hasFilters = status.length > 0 || priority.length > 0;
+  // Same parse as the page, so an invalid value (?status=banana) shows "All", like the list.
+  const { status, priority } = IssueFiltersSchema.parse({
+    status: searchParams.get("status") ?? undefined,
+    priority: searchParams.get("priority") ?? undefined,
+  });
+  const hasFilters = status !== undefined || priority !== undefined;
 
   function updateFilter(key: "status" | "priority", value: string) {
     const newParams = new URLSearchParams(searchParams.toString());
@@ -49,48 +77,20 @@ export function IssueFilters() {
       key={searchParams.toString()}
       className="flex flex-wrap items-end gap-3"
     >
-      <div className="grid gap-1.5">
-        <Label htmlFor="status">Status</Label>
-        <Select
-          defaultValue={status || ALL}
-          onValueChange={(value) => updateFilter("status", value)}
-        >
-          <SelectTrigger id="status" className="w-36">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={ALL}>All</SelectItem>
-            {STATUS_OPTIONS.map(({ value, label }) => (
-              <SelectItem key={value} value={value}>
-                {/* aria-hidden: the text label already names the option */}
-                <StatusIcon status={value} aria-hidden />
-                {label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="grid gap-1.5">
-        <Label htmlFor="priority">Priority</Label>
-        <Select
-          defaultValue={priority || ALL}
-          onValueChange={(value) => updateFilter("priority", value)}
-        >
-          <SelectTrigger id="priority" className="w-36">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={ALL}>All</SelectItem>
-            {PRIORITY_OPTIONS.map(({ value, label }) => (
-              <SelectItem key={value} value={value}>
-                <PriorityIcon priority={value} aria-hidden />
-                {label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      <FilterSelect
+        id="status"
+        label="Status"
+        value={status ?? ALL}
+        options={STATUS_FILTER_OPTIONS}
+        onChange={(value) => updateFilter("status", value)}
+      />
+      <FilterSelect
+        id="priority"
+        label="Priority"
+        value={priority ?? ALL}
+        options={PRIORITY_FILTER_OPTIONS}
+        onChange={(value) => updateFilter("priority", value)}
+      />
 
       {hasFilters && (
         <Button
@@ -102,6 +102,61 @@ export function IssueFilters() {
           Reset
         </Button>
       )}
+    </div>
+  );
+}
+
+/** One filter select, with "All" first. */
+function FilterSelect({
+  id,
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  id: string;
+  label: string;
+  value: string;
+  options: FilterOption[];
+  onChange: (value: string) => void;
+}) {
+  // Mirrors the select's value so the trigger's label is in the server HTML
+  // (Radix fills <SelectValue /> only after hydration).
+  const [selected, setSelected] = useState(value);
+  const option = options.find((opt) => opt.value === selected);
+
+  return (
+    <div className="grid gap-1.5">
+      <Label htmlFor={id}>{label}</Label>
+      <Select
+        defaultValue={value}
+        onValueChange={(next) => {
+          setSelected(next);
+          onChange(next);
+        }}
+      >
+        <SelectTrigger id={id} className="w-36">
+          <SelectValue>
+            {option ? (
+              <>
+                {option.icon}
+                {option.label}
+              </>
+            ) : (
+              "All"
+            )}
+          </SelectValue>
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value={ALL}>All</SelectItem>
+          {options.map((opt) => (
+            <SelectItem key={opt.value} value={opt.value}>
+              {opt.icon}
+              {opt.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 }
