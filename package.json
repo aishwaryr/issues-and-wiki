@@ -11,7 +11,8 @@
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "pw:run": "playwright test"
+    "pw:run": "playwright test",
+    "demo:reset": "bash scripts/reset-demo.sh"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",

@@ -13,5 +13,10 @@
     "name": "E2E Carol",
     "email": "e2e.carol@example.com",
     "password": "carol-e2e-password"
+  },
+  {
+    "name": "Demo User",
+    "email": "demo@triagebook.dev",
+    "password": "triagebook-demo"
   }
 ]

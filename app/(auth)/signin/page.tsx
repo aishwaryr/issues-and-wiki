@@ -8,6 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
+import { TryDemo } from "../try-demo";
 import { SignInForm } from "./signin-form";
 
 export const metadata: Metadata = {
@@ -17,6 +18,10 @@ export const metadata: Metadata = {
 export default function SignInPage() {
   return (
     <Card>
+      <CardContent>
+        <TryDemo />
+      </CardContent>
+
       <CardHeader>
         <CardTitle>
           <h1>Welcome back</h1>

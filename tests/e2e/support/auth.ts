@@ -5,7 +5,8 @@ import users from "../fixtures/users.json";
 export type TestUser = { name: string; email: string; password: string };
 
 // Seeded by global-setup.ts — use these for anything that needs an account.
-export const [alice, bob, carol]: TestUser[] = users;
+// `demo` is the shared account behind the Try Demo button (same email as on the live site).
+export const [alice, bob, carol, demo]: TestUser[] = users;
 
 export async function expectPath(page: Page, pathname: string) {
   await expect(page).toHaveURL((url) => url.pathname === pathname);

@@ -146,6 +146,24 @@ export async function signIn(
   redirect("/");
 }
 
+// ---------- demo sign-in ----------
+
+// Fixed on the server: the button sends no email, so it can't sign in as anyone else.
+const DEMO_EMAIL = "demo@triagebook.dev";
+
+export type DemoSignInState = { message?: string };
+
+/** Signs the visitor in as the shared demo account, with no password. */
+export async function signInAsDemo(): Promise<DemoSignInState> {
+  const user = await getUserByEmail(DEMO_EMAIL);
+  if (!user) {
+    return { message: "The demo account isn't available right now." };
+  }
+
+  await createSession(user.id);
+  redirect("/");
+}
+
 // ---------- sign-out ----------
 
 export async function signOut() {
