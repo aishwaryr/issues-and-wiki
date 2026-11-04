@@ -12,22 +12,28 @@ export async function Navbar() {
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-md">
-      <nav className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-        <div className="flex items-center gap-6">
-          <Link href="/" className="rounded-md">
-            <Brand />
+      {/* Phones (< 640px): logo mark and avatar only, so everything fits in one row at 320px. */}
+      <nav className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-2 px-4">
+        <div className="flex min-w-0 items-center gap-3 sm:gap-6">
+          <Link href="/" className="shrink-0 rounded-md">
+            <Brand compact />
           </Link>
           <NavLinks loggedIn={user !== null} />
         </div>
 
         {user && (
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
             <span className="flex items-center gap-2 text-sm text-muted-foreground">
               <UserAvatar name={user.name} />
-              {user.name}
+              <span className="sr-only sm:not-sr-only">{user.name}</span>
             </span>
             <form action={signOut}>
-              <Button type="submit" variant="ghost" size="sm">
+              <Button
+                type="submit"
+                variant="ghost"
+                size="sm"
+                className="px-2 sm:px-3"
+              >
                 Log out
               </Button>
             </form>

@@ -97,7 +97,8 @@ export default async function IssuePage({
       </header>
 
       <div className="grid items-start gap-6 md:grid-cols-[1fr_18rem]">
-        <div className="space-y-6">
+        {/* min-w-0: a grid item won't shrink below its widest word without it. */}
+        <div className="min-w-0 space-y-6">
           <section aria-labelledby="description-heading">
             <Card>
               <CardContent className="space-y-3">
@@ -108,7 +109,9 @@ export default async function IssuePage({
                   Description
                 </h2>
                 {issue.description ? (
-                  <p className="whitespace-pre-wrap">{issue.description}</p>
+                  <p className="whitespace-pre-wrap wrap-break-word">
+                    {issue.description}
+                  </p>
                 ) : (
                   <p className="text-muted-foreground">No description</p>
                 )}
