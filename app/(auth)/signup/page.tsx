@@ -24,8 +24,8 @@ export default function SignUpPage() {
         <CardDescription>Enter your details to get started.</CardDescription>
       </CardHeader>
       <CardContent>
-        <SignUpForm />
         <TryDemo />
+        <SignUpForm />
       </CardContent>
     </Card>
   );

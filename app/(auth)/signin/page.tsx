@@ -26,8 +26,8 @@ export default function SignInPage() {
       </CardHeader>
 
       <CardContent>
-        <SignInForm />
         <TryDemo />
+        <SignInForm />
       </CardContent>
     </Card>
   );
