@@ -18,11 +18,11 @@ export function TryDemo() {
   return (
     <div className="mb-6 space-y-6">
       <form action={formAction} className="space-y-3">
-        <p className="text-center font-medium text-balance">
+        <p className="font-medium text-balance">
           Explore Triagebook without signing up.
         </p>
         {state.message && (
-          <p className="text-center text-sm text-destructive" role="alert">
+          <p className="text-sm text-destructive" role="alert">
             {state.message}
           </p>
         )}

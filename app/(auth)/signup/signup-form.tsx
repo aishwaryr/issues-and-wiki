@@ -41,7 +41,6 @@ export function SignUpForm() {
           type="text"
           autoComplete="name"
           required
-          autoFocus
           maxLength={120}
           defaultValue={state.values?.name}
           aria-invalid={!!state.errors?.name}
