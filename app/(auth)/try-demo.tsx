@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 
 const initialState: DemoSignInState = {};
 
-/** Try Demo button + "or" divider, above the sign-in and sign-up forms. */
+/** Try Demo button + "or" divider, at the top of the sign-in and sign-up cards. */
 export function TryDemo() {
   const [state, formAction, pending] = useActionState(
     signInAsDemo,
@@ -16,7 +16,7 @@ export function TryDemo() {
   );
 
   return (
-    <div className="mb-6 space-y-6">
+    <div className="space-y-6">
       <form action={formAction} className="space-y-3">
         <p className="font-medium text-balance">
           Explore Triagebook without signing up.

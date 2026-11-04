@@ -18,6 +18,10 @@ export const metadata: Metadata = {
 export default function SignInPage() {
   return (
     <Card>
+      <CardContent>
+        <TryDemo />
+      </CardContent>
+
       <CardHeader>
         <CardTitle>
           <h1>Welcome back</h1>
@@ -26,7 +30,6 @@ export default function SignInPage() {
       </CardHeader>
 
       <CardContent>
-        <TryDemo />
         <SignInForm />
       </CardContent>
     </Card>

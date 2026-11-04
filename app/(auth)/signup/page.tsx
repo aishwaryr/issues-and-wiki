@@ -17,14 +17,18 @@ export const metadata: Metadata = {
 export default function SignUpPage() {
   return (
     <Card>
+      <CardContent>
+        <TryDemo />
+      </CardContent>
+
       <CardHeader>
         <CardTitle>
           <h1>Create an account</h1>
         </CardTitle>
         <CardDescription>Enter your details to get started.</CardDescription>
       </CardHeader>
+
       <CardContent>
-        <TryDemo />
         <SignUpForm />
       </CardContent>
     </Card>
