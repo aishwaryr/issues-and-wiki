@@ -33,6 +33,16 @@ if [[ -z "$snapshot_url" || -z "$target_url" ]]; then
   echo "A connection string is empty." >&2
   exit 1
 fi
+# Neon's Connect dialog defaults to `neondb` (the dev data), so check the database name.
+db_name() { local path="${1#*://*/}"; echo "${path%%\?*}"; }
+if [[ "$(db_name "$snapshot_url")" != "triagebook_prod" ]]; then
+  echo "The snapshot string must use database triagebook_prod, not '$(db_name "$snapshot_url")'." >&2
+  exit 1
+fi
+if [[ "$target" == "prod" && "$(db_name "$target_url")" != "triagebook_prod" ]]; then
+  echo "The production string must use database triagebook_prod, not '$(db_name "$target_url")'." >&2
+  exit 1
+fi
 if [[ "$snapshot_url" == "$target_url" ]]; then
   echo "The snapshot and the target are the same database." >&2
   exit 1
