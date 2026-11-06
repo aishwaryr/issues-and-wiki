@@ -7,7 +7,11 @@ import { db } from "@/db";
 import { users } from "@/db/schema";
 import { getUserByEmail } from "@/lib/dal";
 import { readForm } from "@/lib/form-data";
-import { hashPassword, verifyPassword } from "@/lib/password";
+import {
+  burnPasswordCompare,
+  hashPassword,
+  verifyPassword,
+} from "@/lib/password";
 import { createSession, deleteSession } from "@/lib/session";
 
 // ---------- sign-up ----------
@@ -137,7 +141,11 @@ export async function signIn(
   };
 
   const user = await getUserByEmail(email);
-  if (!user) return invalidEmailPassword;
+  // Same bcrypt cost as a wrong password, so response time can't tell which emails exist.
+  if (!user) {
+    await burnPasswordCompare(password);
+    return invalidEmailPassword;
+  }
 
   const passwordCheck = await verifyPassword(password, user.passwordHash);
   if (!passwordCheck) return invalidEmailPassword;
