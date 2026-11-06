@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useActionState, useRef, useState } from "react";
 import Link from "next/link";
 
 import { signUp, type SignUpState } from "@/app/actions/auth";
@@ -8,6 +8,7 @@ import { PasswordInput } from "@/components/password-input";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useFocusFirstError } from "@/components/use-focus-first-error";
 
 const initialState: SignUpState = {};
 
@@ -17,19 +18,17 @@ export function SignUpForm() {
 
   const [password, setPassword] = useState("");
 
-  useEffect(() => {
-    const firstInvalid = state.errors && Object.keys(state.errors)[0];
-    if (!firstInvalid) return;
-
-    formRef.current
-      ?.querySelector<HTMLInputElement>(`[name="${firstInvalid}"]`)
-      ?.focus();
-  }, [state]);
+  useFocusFirstError(formRef, state);
 
   return (
     <form action={formAction} className="space-y-6" ref={formRef}>
       {state.message && (
-        <p role="alert" className="text-sm text-destructive">
+        <p
+          data-form-message
+          tabIndex={-1}
+          role="alert"
+          className="text-sm text-destructive outline-none"
+        >
           {state.message}
         </p>
       )}

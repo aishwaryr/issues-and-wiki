@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useRef } from "react";
 import Link from "next/link";
 
 import type { WikiPageFormState } from "@/app/actions/wiki";
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useFocusFirstError } from "@/components/use-focus-first-error";
 
 /** Type: props for WikiPageForm — which action to call, and what differs between new and edit. */
 type WikiPageFormProps = {
@@ -29,14 +30,21 @@ export function WikiPageForm({
   pendingLabel,
   cancelHref,
 }: WikiPageFormProps) {
+  const formRef = useRef<HTMLFormElement>(null);
   const [state, formAction, pending] = useActionState(action, {
     values: initialValues,
   });
+  useFocusFirstError(formRef, state);
 
   return (
-    <form className="space-y-6" action={formAction}>
+    <form className="space-y-6" action={formAction} ref={formRef}>
       {state.message && (
-        <p role="alert" className="text-sm text-destructive">
+        <p
+          data-form-message
+          tabIndex={-1}
+          role="alert"
+          className="text-sm text-destructive outline-none"
+        >
           {state.message}
         </p>
       )}

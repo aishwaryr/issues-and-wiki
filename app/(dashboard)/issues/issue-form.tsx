@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useRef, useState } from "react";
 import Link from "next/link";
 
 import { PriorityIcon, StatusIcon } from "@/components/issue-icons";
@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useFocusFirstError } from "@/components/use-focus-first-error";
 import {
   type AssigneeOption,
   type IssueFormState,
@@ -45,9 +46,11 @@ export function IssueForm({
   cancelHref,
   users,
 }: IssueFormProps) {
+  const formRef = useRef<HTMLFormElement>(null);
   const [state, formAction, pending] = useActionState(action, {
     values: initialValues,
   });
+  useFocusFirstError(formRef, state);
 
   // Radix fills <SelectValue /> only after hydration, so the server HTML showed empty
   // selects. These mirror each select's value so its label renders on the server too.
@@ -61,9 +64,14 @@ export function IssueForm({
   const assignee = users.find((user) => user.id === assigneeId);
 
   return (
-    <form className="space-y-6" action={formAction}>
+    <form className="space-y-6" action={formAction} ref={formRef}>
       {state.message && (
-        <p role="alert" className="text-sm text-destructive">
+        <p
+          data-form-message
+          tabIndex={-1}
+          role="alert"
+          className="text-sm text-destructive outline-none"
+        >
           {state.message}
         </p>
       )}
