@@ -15,6 +15,9 @@
   --popover-foreground: #1b1c22;
   --primary: #5e6ad2;
   --primary-foreground: #ffffff;
+  /* Link text. Separate from --primary: in dark mode no single indigo gives white button
+     text 4.5:1 and also reads at 4.5:1 as text on the dark surfaces. */
+  --link: #5e6ad2;
   --secondary: #f2f3f6;
   --secondary-foreground: #1b1c22;
   --muted: #f2f3f6;
@@ -38,6 +41,7 @@
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-link: var(--link);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
@@ -63,8 +67,11 @@
   --card-foreground: #e6e7eb;
   --popover: #1b1c21;
   --popover-foreground: #e6e7eb;
-  --primary: #6f7ae0;
+  /* White text on it: 4.7:1 (WCAG AA). */
+  --primary: #5e6ad2;
   --primary-foreground: #ffffff;
+  /* 4.7:1 on --card. */
+  --link: #6f7ae0;
   --secondary: #1f2026;
   --secondary-foreground: #e6e7eb;
   --muted: #1f2026;
