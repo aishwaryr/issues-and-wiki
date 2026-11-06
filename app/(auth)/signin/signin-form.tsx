@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useRef } from "react";
 import Link from "next/link";
 
 import { signIn, type SignInState } from "@/app/actions/auth";
@@ -8,16 +8,25 @@ import { PasswordInput } from "@/components/password-input";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useFocusFirstError } from "@/components/use-focus-first-error";
 
 const initialState: SignInState = {};
 
 export function SignInForm() {
+  const formRef = useRef<HTMLFormElement>(null);
   const [state, formAction, pending] = useActionState(signIn, initialState);
+  useFocusFirstError(formRef, state);
 
   return (
-    <form className="space-y-6" action={formAction}>
+    <form className="space-y-6" action={formAction} ref={formRef}>
       {state.message && (
-        <p id="form-message" className="text-sm text-destructive" role="alert">
+        <p
+          id="form-message"
+          data-form-message
+          tabIndex={-1}
+          className="text-sm text-destructive outline-none"
+          role="alert"
+        >
           {state.message}
         </p>
       )}
