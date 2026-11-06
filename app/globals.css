@@ -5,6 +5,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
+  color-scheme: light;
   /* Cool neutrals with one indigo accent: quiet surfaces, so status colors and data stand out. */
   --background: #fbfbfc;
   --foreground: #1b1c22;
@@ -53,8 +54,8 @@
   --font-mono: var(--font-geist-mono);
 }
 
-/* Dark is the only theme for now: the root layout always sets .dark.
-   A light / dark / system toggle comes later. */
+/* The root layout sets .dark from the theme cookie; for "system", lib/theme.ts's
+   inline script sets it from the OS setting. */
 .dark {
   color-scheme: dark;
   --background: #0f1013;
