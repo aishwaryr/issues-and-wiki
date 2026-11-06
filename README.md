@@ -11,7 +11,7 @@ Click **Try Demo** on the sign-in page, no account needed. (Or sign in with `dem
 
 - **Dashboard:** open, in-progress, done and assigned-to-you counts, a 14-day "issues created" chart, issues by status, and recently updated issues.
 - **Issues:** create, edit, delete, and assign to any teammate (or yourself in one click). Each issue has a readable key and URL, like `/issues/ISS-12`.
-- **Filters in the URL:** status and priority filters live in the query string, so a filtered list can be bookmarked and shared.
+- **Search and filters in the URL:** Postgres full-text search over titles and descriptions, plus status, priority and assignee filters, all in the query string, so a filtered list can be bookmarked and shared.
 - **Comments:** a timeline on every issue, with author and date.
 - **Wiki:** markdown pages with tables, code and lists, at readable URLs like `/wiki/release-process`.
 - **Issues ↔ wiki links:** an issue lists the pages that explain it, and a page lists its issues.
@@ -61,7 +61,7 @@ flowchart LR
 
 - **AI features:** turn a pasted Slack thread or email into issue drafts to review; priority suggestions with a reason; related issues and pages through Postgres full-text search; and answers from the wiki with citations.
 - **Mobile layout** across the app, and an accessibility pass over all forms.
-- **Text search and an assignee filter** on the issues list, and rate limiting on sign-in.
+- **Rate limiting** on sign-in and sign-up.
 
 ## Run locally
 

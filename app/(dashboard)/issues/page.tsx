@@ -7,7 +7,7 @@ import { IssueFilters } from "@/components/issue-filters";
 import { PriorityIcon, StatusIcon } from "@/components/issue-icons";
 import { UserAvatar } from "@/components/user-avatar";
 import { Button } from "@/components/ui/button";
-import { listIssues } from "@/lib/dal";
+import { listIssues, listUsers } from "@/lib/dal";
 import { formatDate } from "@/lib/dates";
 import { formatIssueKey, IssueFiltersSchema } from "@/lib/issues";
 
@@ -17,9 +17,10 @@ export default async function IssuesPage({
   searchParams,
 }: PageProps<"/issues">) {
   const filters = IssueFiltersSchema.parse(await searchParams);
-  const hasFilters =
-    filters.status !== undefined || filters.priority !== undefined;
-  const issues = await listIssues(filters);
+  const hasFilters = Object.values(filters).some(
+    (value) => value !== undefined,
+  );
+  const [issues, users] = await Promise.all([listIssues(filters), listUsers()]);
 
   const newIssueButton = (
     <Button asChild>
@@ -44,13 +45,13 @@ export default async function IssuesPage({
       </div>
 
       {/* filters */}
-      <IssueFilters />
+      <IssueFilters users={users} />
 
       {/* list */}
       {issues.length === 0 && hasFilters ? (
         <EmptyState
           title="No issues match these filters"
-          description="Try another status or priority."
+          description="Try other words or another filter."
           action={
             <Button variant="outline" asChild>
               <Link href="/issues">Reset filters</Link>
