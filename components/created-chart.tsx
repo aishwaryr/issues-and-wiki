@@ -26,11 +26,15 @@ export function CreatedChart({ days }: { days: DayCount[] }) {
 
   return (
     <figure>
-      <div className="flex h-40 items-end gap-0.5 border-b" aria-hidden>
+      {/* Not aria-hidden: the bars are focusable, and a focusable element inside aria-hidden
+          is unreachable for screen readers. role="img" + a label reads like the tooltip. */}
+      <div className="flex h-40 items-end gap-0.5 border-b">
         {days.map((day, index) => (
           <div
             key={day.date}
             tabIndex={0}
+            role="img"
+            aria-label={`${formatDay(day.date)}: ${day.count} ${day.count === 1 ? "issue" : "issues"}`}
             className="group relative flex h-full flex-1 items-end justify-center rounded-sm outline-none hover:bg-accent/60 focus-visible:bg-accent/60"
           >
             {index === peak && day.count > 0 && (
