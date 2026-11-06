@@ -1,9 +1,16 @@
 "use client";
 
-import { type ReactNode, useState } from "react";
+import {
+  type ReactNode,
+  type RefObject,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -14,9 +21,12 @@ import {
 } from "@/components/ui/select";
 import { PriorityIcon, StatusIcon } from "@/components/issue-icons";
 import {
+  ASSIGNEE_ME,
+  type AssigneeOption,
   IssueFiltersSchema,
   PRIORITY_OPTIONS,
   STATUS_OPTIONS,
+  UNASSIGNED,
 } from "@/lib/issues";
 
 // Radix Select doesn't allow "" as an item value, so "All" uses a sentinel
@@ -43,21 +53,39 @@ const PRIORITY_FILTER_OPTIONS: FilterOption[] = PRIORITY_OPTIONS.map(
   }),
 );
 
-export function IssueFilters() {
+/** Type: a URL key the filter bar writes. */
+type FilterKey = "status" | "priority" | "assignee" | "q";
+
+/** Status, priority and assignee selects plus a search box; all state lives in the URL. */
+export function IssueFilters({ users }: { users: AssigneeOption[] }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  // The search box is uncontrolled; Reset empties it through this ref.
+  const searchInput = useRef<HTMLInputElement>(null);
 
   // Same parse as the page, so an invalid value (?status=banana) shows "All", like the list.
-  const { status, priority } = IssueFiltersSchema.parse({
+  const { status, priority, assignee, q } = IssueFiltersSchema.parse({
     status: searchParams.get("status") ?? undefined,
     priority: searchParams.get("priority") ?? undefined,
+    assignee: searchParams.get("assignee") ?? undefined,
+    q: searchParams.get("q") ?? undefined,
   });
-  const hasFilters = status !== undefined || priority !== undefined;
+  const hasFilters =
+    status !== undefined ||
+    priority !== undefined ||
+    assignee !== undefined ||
+    q !== undefined;
 
-  function updateFilter(key: "status" | "priority", value: string) {
+  const assigneeOptions: FilterOption[] = [
+    { value: ASSIGNEE_ME, label: "Me" },
+    { value: UNASSIGNED, label: "Unassigned" },
+    ...users.map((user) => ({ value: user.id, label: user.name })),
+  ];
+
+  function updateFilter(key: FilterKey, value: string) {
     const newParams = new URLSearchParams(searchParams.toString());
-    if (value === ALL) {
+    if (value === ALL || value === "") {
       newParams.delete(key);
     } else {
       newParams.set(key, value);
@@ -71,30 +99,46 @@ export function IssueFilters() {
   }
 
   return (
-    // Selects are uncontrolled (defaultValue); keying on the URL remounts them
-    // whenever it changes, so Reset and back/forward show the current filters.
-    <div
-      key={searchParams.toString()}
-      className="flex flex-wrap items-end gap-3"
-    >
-      <FilterSelect
-        id="status"
-        label="Status"
-        value={status ?? ALL}
-        options={STATUS_FILTER_OPTIONS}
-        onChange={(value) => updateFilter("status", value)}
+    <div className="flex flex-wrap items-end gap-3">
+      {/* Outside the keyed group below: remounting it on every URL change would drop
+          focus mid-typing. */}
+      <SearchBox
+        inputRef={searchInput}
+        defaultValue={q ?? ""}
+        onSearch={(value) => updateFilter("q", value)}
       />
-      <FilterSelect
-        id="priority"
-        label="Priority"
-        value={priority ?? ALL}
-        options={PRIORITY_FILTER_OPTIONS}
-        onChange={(value) => updateFilter("priority", value)}
-      />
+      {/* Selects are uncontrolled (defaultValue); keying on the URL remounts them
+          whenever it changes, so Reset and back/forward show the current filters. */}
+      <div key={searchParams.toString()} className="contents">
+        <FilterSelect
+          id="status"
+          label="Status"
+          value={status ?? ALL}
+          options={STATUS_FILTER_OPTIONS}
+          onChange={(value) => updateFilter("status", value)}
+        />
+        <FilterSelect
+          id="priority"
+          label="Priority"
+          value={priority ?? ALL}
+          options={PRIORITY_FILTER_OPTIONS}
+          onChange={(value) => updateFilter("priority", value)}
+        />
+        <FilterSelect
+          id="assignee"
+          label="Assignee"
+          value={assignee ?? ALL}
+          options={assigneeOptions}
+          onChange={(value) => updateFilter("assignee", value)}
+        />
+      </div>
 
       {hasFilters && (
         <Button
           onClick={() => {
+            if (searchInput.current) {
+              searchInput.current.value = "";
+            }
             router.replace(pathname);
           }}
           variant="ghost"
@@ -102,6 +146,42 @@ export function IssueFilters() {
           Reset
         </Button>
       )}
+    </div>
+  );
+}
+
+const SEARCH_DEBOUNCE_MS = 300;
+
+/** Search box; writes ?q= once typing pauses, so each keystroke isn't a server render. */
+function SearchBox({
+  inputRef,
+  defaultValue,
+  onSearch,
+}: {
+  inputRef: RefObject<HTMLInputElement | null>;
+  defaultValue: string;
+  onSearch: (value: string) => void;
+}) {
+  const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  // A pending search shouldn't fire after the box is gone.
+  useEffect(() => () => clearTimeout(timer.current), []);
+
+  return (
+    <div className="grid w-full gap-1.5 sm:w-64">
+      <Label htmlFor="q">Search</Label>
+      <Input
+        ref={inputRef}
+        id="q"
+        type="search"
+        placeholder="Words in the title or description"
+        defaultValue={defaultValue}
+        onChange={(event) => {
+          const value = event.target.value.trim();
+          clearTimeout(timer.current);
+          timer.current = setTimeout(() => onSearch(value), SEARCH_DEBOUNCE_MS);
+        }}
+      />
     </div>
   );
 }

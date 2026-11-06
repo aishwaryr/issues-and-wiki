@@ -149,11 +149,27 @@ export type IssueFormState = {
 
 // Filters
 
+/** `?assignee=me`: issues assigned to the signed-in user. */
+export const ASSIGNEE_ME = "me";
+
 /** Validates the list filters from the URL; an invalid or missing value becomes undefined. */
 export const IssueFiltersSchema = z.object({
   status: z.enum(ISSUE_STATUSES).optional().catch(undefined),
   priority: z.enum(ISSUE_PRIORITIES).optional().catch(undefined),
+  // Search words; blank becomes undefined, so `?q=` doesn't count as a filter.
+  q: z
+    .string()
+    .trim()
+    .max(200)
+    .transform((value) => value || undefined)
+    .optional()
+    .catch(undefined),
+  // "me", "unassigned" (UNASSIGNED) or a user id.
+  assignee: z
+    .union([z.literal(ASSIGNEE_ME), z.literal(UNASSIGNED), z.uuid()])
+    .optional()
+    .catch(undefined),
 });
 
-/** Type: parsed list filters (`{ status?, priority? }`). */
+/** Type: parsed list filters (`{ status?, priority?, q?, assignee? }`). */
 export type IssueFiltersInput = z.infer<typeof IssueFiltersSchema>;

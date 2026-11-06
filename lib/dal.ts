@@ -2,7 +2,18 @@ import "server-only";
 
 import { cache } from "react";
 import { redirect } from "next/navigation";
-import { and, asc, count, desc, eq, gte, notInArray, sql } from "drizzle-orm";
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  gte,
+  isNull,
+  notInArray,
+  type SQL,
+  sql,
+} from "drizzle-orm";
 
 import { db } from "@/db";
 import {
@@ -13,7 +24,12 @@ import {
   wikiPages,
 } from "@/db/schema";
 import { lastDays } from "@/lib/dates";
-import { parseIssueKey, type IssueFiltersInput } from "@/lib/issues";
+import {
+  ASSIGNEE_ME,
+  type IssueFiltersInput,
+  parseIssueKey,
+  UNASSIGNED,
+} from "@/lib/issues";
 import { getSession } from "@/lib/session";
 
 // Users
@@ -80,9 +96,37 @@ export async function listUsers() {
 
 // Issues
 
-/** All issues, newest first, filtered by status and priority when given. */
+/** The WHERE condition for the assignee filter ("me", unassigned, or one user). */
+function assigneeCondition(
+  assignee: IssueFiltersInput["assignee"],
+  userId: string,
+): SQL | undefined {
+  if (assignee === undefined) {
+    return undefined;
+  }
+  if (assignee === UNASSIGNED) {
+    return isNull(issues.assigneeId);
+  }
+  return eq(issues.assigneeId, assignee === ASSIGNEE_ME ? userId : assignee);
+}
+
+/**
+ * Postgres full-text search over title + description. websearch_to_tsquery takes what
+ * people type ("cart -guest", "checkout OR login", "exact phrase") and never throws on
+ * odd input. English stemming: "crashes" finds "crash". No GIN index yet: fine at this
+ * size; an expression index on the same to_tsvector is the next step.
+ */
+function searchCondition(q: string | undefined): SQL | undefined {
+  if (q === undefined) {
+    return undefined;
+  }
+  return sql`to_tsvector('english', ${issues.title} || ' ' || coalesce(${issues.description}, ''))
+    @@ websearch_to_tsquery('english', ${q})`;
+}
+
+/** All issues, newest first, filtered by status, priority, assignee and search words. */
 export async function listIssues(filters: IssueFiltersInput = {}) {
-  await requireUser();
+  const user = await requireUser();
 
   // LEFT join keeps unassigned issues (assigneeName is null); one query, no N+1.
   return db
@@ -101,6 +145,8 @@ export async function listIssues(filters: IssueFiltersInput = {}) {
       and(
         filters.status ? eq(issues.status, filters.status) : undefined,
         filters.priority ? eq(issues.priority, filters.priority) : undefined,
+        assigneeCondition(filters.assignee, user.id),
+        searchCondition(filters.q),
       ),
     )
     .orderBy(desc(issues.createdAt));
