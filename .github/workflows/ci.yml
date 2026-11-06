@@ -5,10 +5,12 @@ on:
   push:
     branches: [master]
 
-# A new push to the same branch cancels the run that's still going.
+# One run at a time across all branches: every run shares the one ci database, and two
+# runs of the same spec would delete each other's rows. GitHub keeps only one waiting
+# run per group, so a newer one cancels the older waiting one.
 concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  group: ci-db
+  cancel-in-progress: false
 
 permissions:
   contents: read
